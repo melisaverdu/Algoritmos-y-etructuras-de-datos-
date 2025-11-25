@@ -3,7 +3,8 @@
 
 using namespace std;
 
-void swap(int &a, int &b);
+
+
 int main(int argc, char *argv[])
 {   int x,y;
     /*-defino punteros a enteros
@@ -54,6 +55,9 @@ int main(int argc, char *argv[])
              <<"  "<<*(v+i)<<"  "<<*py++; // ambas formas son equivalentes
          //el py++ avanza al siguiente elemento del arreglo y el "*" obtiene su valor
      }
+
+     //-----------------------------------------------------------------------
+
      cout<<endl<<"px= "<<px;
      cout<<endl<<"v= "<<v;
      cout<<endl<<"py= "<<py;
