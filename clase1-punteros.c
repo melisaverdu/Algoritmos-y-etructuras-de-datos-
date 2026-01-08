@@ -7,8 +7,7 @@ using namespace std;
 
 int main(int argc, char *argv[])
 {   int x,y;
-    /*-defino punteros a enteros
-    contienen direcciones de enteros
+    /*-defino punteros a enteros contienen direcciones de enteros
     */
     int *px,*py;
 

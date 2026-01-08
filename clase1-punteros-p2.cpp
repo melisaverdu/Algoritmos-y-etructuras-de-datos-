@@ -51,7 +51,7 @@ void swap(int a, int b)
     cout<<"\n a="<<a<<"  b="<<b;
     c=a; a=b; b=c;
     cout<<"\n a="<<a<<"  b="<<b;   
-    // los cambios no afectan a x e y, todo se hace dentro de esta función
+    // los cambios no afectan a x e y, todo se hace dentro de esta función 
 }
 void swap(int *a, int *b)
 {   int c;
