@@ -20,7 +20,8 @@ int main(){
     cout<<"\n x="<<x<<"  y="<<y;
     //swap(x,y); 
     swap(&x,&y); //llamo a la función que usa punteros -> con & le mando la dirección de x e y
-                //ahora el cambio si se ve en el main, porque trabajo con direcciones de memoria
+                
+    //ahora el cambio si se ve en el main, porque trabajo con direcciones de memoria
 
     swap(x,y); //llamo a la función que usa referencias -> con & le mando la dirección de x e y
                 //ahora el cambio si se ve en el main, porque trabajo con referencias
@@ -51,7 +52,7 @@ void swap(int a, int b)
     cout<<"\n a="<<a<<"  b="<<b;
     c=a; a=b; b=c;
     cout<<"\n a="<<a<<"  b="<<b;   
-    // los cambios no afectan a x e y, todo se hace dentro de esta función 
+    // los cambios no afectan a x e y, todo se hace dentro de esta función
 }
 void swap(int *a, int *b)
 {   int c;
