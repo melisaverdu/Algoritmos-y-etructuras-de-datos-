@@ -61,8 +61,7 @@ int main(int argc, char *argv[])
      cout<<endl<<"v= "<<v;
      cout<<endl<<"py= "<<py;
      
-     
-         
+        
     cout<<endl;
     system("PAUSE");
     return EXIT_SUCCESS;
