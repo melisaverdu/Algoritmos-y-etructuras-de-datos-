@@ -71,16 +71,17 @@ Ejemplo:
 */
 
 // DESARROLLE SU FUNCION AQUI
-void removeNegative(Nodo*& head){
-    if(head == nullptr) return;
+Nodo* removeNegatives(Nodo* head){
+    if(head == nullptr) return nullptr;
 
     if(head->valor < 0){
         Nodo* temp = head;
         head = head->next;
         delete temp;
-        removeNegative(head);
+        return removeNegatives(head);
     } else {
-        removeNegative(head->next);
+        head->next = removeNegatives(head->next);
+        return head;
     }
 
 }
@@ -116,6 +117,13 @@ int countNodes(Nodo* head){
 
     return 1 + countNodes(head->next);
 }
+    */
+int countNodes(Nodo* head){
+    if(head == nullptr) return 0;
+
+    return 1 + countNodes(head->next);
+}
+/*
 ============================================================
 PREGUNTA 3 — esAlternante
 ============================================================
@@ -144,6 +152,7 @@ bool esAlternante(Nodo* head){
         } else {
             return false;   
         }
+}
 }
 
 /*
