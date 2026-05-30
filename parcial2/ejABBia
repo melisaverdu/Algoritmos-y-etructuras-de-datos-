@@ -1,0 +1,55 @@
+#include <iostream>
+using namespace std;
+
+class Nodo {
+public:
+    int dato;
+    Nodo* izq;
+    Nodo* der;
+
+    Nodo(int x)
+        : dato(x), izq(nullptr), der(nullptr) {}
+};
+/*
+Ejercicio
+
+En un sistema de monitoreo de servidores, cada servidor posee un identificador entero almacenado en un Árbol Binario de Búsqueda (ABB).
+
+Implementar un método que cuente cuántos nodos tienen exactamente un hijo.
+
+Un nodo tiene exactamente un hijo cuando: 
+tiene hijo izquierdo y no derecho
+o tiene hijo derecho y no izquierdo
+*/
+class ABB {
+
+private:
+
+    Nodo* raiz = nullptr;
+
+    int contarUnHijoRec(Nodo* p){
+        if(p == nullptr){
+            return 0;
+        }
+        //int count = 0;
+        /*if(p!=nullptr && p->izq != nullptr && p->der == nullptr){
+            //count ++;
+            return 1 + contarUnHijoRec(p->izq);
+        }
+        else if(p!=nullptr && p->izq == nullptr && p->der != nullptr){
+            //count ++;
+            return 1 + contarUnHijoRec(p->der);
+        }
+        return 0;*/
+        if((p->izq != nullptr && p->der == nullptr) || (p->izq == nullptr && p->der != nullptr)){
+            return 1 + contarUnHijoRec(p->izq) + contarUnHijoRec(p->der);
+        }
+        return contarUnHijoRec(p->izq) + contarUnHijoRec(p->der);
+    }
+
+public:
+
+    int contarUnHijo(){
+        return contarUnHijoRec(raiz);
+    }
+};

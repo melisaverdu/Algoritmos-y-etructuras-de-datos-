@@ -1,0 +1,112 @@
+#include <iostream>
+#include <cmath>
+using namespace std;
+
+struct Nodo {
+
+    int dato;
+    Nodo* izquierdo;
+    Nodo* derecho;
+
+    Nodo(int v)
+        : dato(v), izquierdo(nullptr), derecho(nullptr) {}
+};
+
+class BST {
+
+private:
+
+    Nodo* raiz;
+
+    // Retorna altura si está balanceado
+    // o -1 si no lo está
+    int BST::esBalanceadoRecursivo(Nodo* nodo) {
+
+    // Caso base
+    if(nodo == nullptr) {
+        return 0;
+    }
+
+    // Calcular altura izquierda
+    int alturaIzq = esBalanceadoRecursivo(nodo->izquierdo);
+
+    // Si izquierda ya está desbalanceada
+    if(alturaIzq == -1) {
+        return -1;
+    }
+
+    // Calcular altura derecha
+    int alturaDer = esBalanceadoRecursivo(nodo->derecho);
+
+    // Si derecha ya está desbalanceada
+    if(alturaDer == -1) {
+        return -1;
+    }
+
+    // Verificar diferencia de alturas
+    if(abs(alturaIzq - alturaDer) > 1) {
+        return -1;
+    }
+
+    // Retornar altura actual
+    return 1 + max(alturaIzq, alturaDer);
+}
+
+bool BST::esBalanceado() {
+
+    return esBalanceadoRecursivo(raiz) != -1;
+}
+
+
+public:
+
+    BST() : raiz(nullptr) {}
+
+    BST(Nodo* valor): raiz(valor) {}
+
+    bool esBalanceado(){
+        return esBalanceadoRecursivo(raiz) != -1;
+    }
+};
+/*
+Durante la fase crítica de descenso en Marte, la computadora de vuelo de la misión CONAE-Marte utiliza un árbol binario de decisiones
+para seleccionar maniobras según condiciones (velocidad, altitud, temperatura externa, etc.).
+Para garantizar tiempos de respuesta razonables, este árbol debe estar balanceado, es decir:
+La diferencia de alturas entre subárbol izquierdo y derecho en cada nodo es a lo sumo 1
+Ambos subárboles también son balanceados
+El árbol vacío se considera balanceado
+Implementá desde cero:
+La función recursiva esBalanceadoRecursivo(Nodo*)
+La clase BST, que recibe la raíz en su constructor y expone un método bool esBalanceado() que retorna true si el árbol está balanceado
+*/
+// ======================================
+// IMPLEMENTAR ACA
+// ======================================
+
+int BST::esBalanceadoRecursivo(Nodo* nodo) {
+
+}
+
+bool BST::esBalanceado() {
+
+}
+
+// ======================================
+// TESTS
+// ======================================
+
+int main() {
+
+    Nodo* raiz = new Nodo(10);
+
+    raiz->izquierdo = new Nodo(5);
+    raiz->derecho = new Nodo(15);
+
+    raiz->izquierdo->izquierdo = new Nodo(3);
+
+    BST* arbol = new BST(raiz);
+
+    cout << (arbol->esBalanceado() ? "Si" : "No") << endl;
+
+    return 0;
+}

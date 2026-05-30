@@ -1,0 +1,49 @@
+#include <iostream>
+using namespace std;
+
+class Nodo {
+public:
+    int dato;
+    Nodo* izq;
+    Nodo* der;
+
+    Nodo(int x)
+        : dato(x), izq(nullptr), der(nullptr) {}
+};
+
+class ABB {
+/*
+Ejercicio: Contar hojas
+
+En un ABB que almacena números enteros, implementar un método que cuente cuántas hojas tiene el árbol.
+
+Una hoja es un nodo que:
+
+no tiene hijo izquierdo
+y
+no tiene hijo derecho
+*/
+
+private:
+
+    Nodo* raiz = nullptr;
+
+   int contarHojasRec(Nodo* p){
+
+    if(p == nullptr){
+        return 0;
+    }
+
+    if(p->izq == nullptr && p->der == nullptr){
+        return 1;
+    }
+
+    return contarHojasRec(p->izq) + contarHojasRec(p->der);
+}
+
+public:
+
+    int contarHojas(){
+        return contarHojasRec(raiz);
+    }
+};

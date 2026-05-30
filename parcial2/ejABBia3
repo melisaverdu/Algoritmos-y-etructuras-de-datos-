@@ -1,0 +1,47 @@
+#include <iostream>
+using namespace std;
+
+class Nodo {
+public:
+    int dato;
+    Nodo* izq;
+    Nodo* der;
+
+    Nodo(int x)
+        : dato(x), izq(nullptr), der(nullptr) {}
+};
+
+class ABB {
+/*
+Ejercicio: Contar nodos internos
+
+En un Árbol Binario de Búsqueda (ABB), implementar un método que cuente cuántos nodos internos tiene el árbol.
+
+Un nodo interno es un nodo que tiene al menos un hijo.
+
+Por lo tanto:
+
+Las hojas NO cuentan.
+El árbol vacío tiene 0 nodos internos.
+*/
+private:
+
+    Nodo* raiz = nullptr;
+
+    int contarInternosRec(Nodo* p){
+        if(p == nullptr){
+            return 0;
+        }
+
+        if(p->der != nullptr || p->izq != nullptr){ //|| (p->der != nullptr && p->izq != nullptr)) ----> esa condición esta al vicio
+            return 1 + contarInternosRec(p->izq) + contarInternosRec(p->der);
+        }
+        return contarInternosRec(p->izq) + contarInternosRec(p->der);
+    }
+
+public:
+
+    int contarInternos(){
+        return contarInternosRec(raiz);
+    }
+};

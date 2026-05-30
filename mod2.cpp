@@ -95,7 +95,7 @@ Restricciones:
 - Debe liberar memoria
 */
 
-- forma iterativa
+//forma iterativa
 void dequeueAll(Nodo*& front, Nodo*& rear, int value){
     while(front != nullptr && front->valor == value){
         Nodo* temp = front;

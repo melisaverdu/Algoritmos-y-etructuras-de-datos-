@@ -1,0 +1,187 @@
+#include <iostream>
+#include <initializer_list>
+
+struct Nodo {
+    int valor;
+    Nodo* next;
+
+    explicit Nodo(int v) : valor(v), next(nullptr) {}
+};
+
+/*
+============================================================
+HELPERS (NO MODIFICAR)
+============================================================
+*/
+
+Nodo* buildList(std::initializer_list<int> vals) {
+    Nodo* head = nullptr;
+    Nodo* tail = nullptr;
+
+    for (int v : vals) {
+        Nodo* n = new Nodo(v);
+
+        if (!head) {
+            head = tail = n;
+        } else {
+            tail->next = n;
+            tail = n;
+        }
+    }
+
+    return head;
+}
+
+void printList(Nodo* head) {
+    while (head) {
+        std::cout << head->valor;
+        if (head->next) std::cout << " -> ";
+        head = head->next;
+    }
+    std::cout << "\n";
+}
+
+void freeList(Nodo* head) {
+    while (head) {
+        Nodo* temp = head;
+        head = head->next;
+        delete temp;
+    }
+}
+
+/*
+============================================================
+PREGUNTA 1 — Filtrado de Stack de Energía
+============================================================
+
+Un stack representa cargas de energía acumuladas.
+Eliminar TODOS los nodos cuyo valor sea par.
+
+Implementá:
+
+Nodo* removeEvenFromStack(Nodo* top);
+
+⚠️ Restricciones:
+- Debe ser estrictamente recursiva — NO loops
+- Debe modificar la estructura original
+- Debe liberar memoria
+- Debe retornar el nuevo top
+
+Ejemplo:
+
+TOP -> 7 -> 4 -> 3 -> 2 -> 1
+
+↓
+
+TOP -> 7 -> 3 -> 1
+*/
+
+// DESARROLLE SU FUNCION AQUI
+
+Nodo* removeEvenFromStack(Nodo* top){
+    if(top == nullptr){
+        return nullptr;
+    }
+    if (top->valor % 2 == 0){
+        Nodo* temp = top;
+        top = top->next;
+        delete temp;
+        return removeEvenFromStack(top);
+    } else {
+        top->next = removeEvenFromStack(top->next);
+        return top;
+    }
+}
+
+/*
+============================================================
+PREGUNTA 2 — Compresión de Cola de Eventos
+============================================================
+
+Una queue contiene eventos duplicados consecutivos.
+Comprimir la cola dejando un único nodo por grupo consecutivo.
+
+Transformar:
+
+1 -> 1 -> 2 -> 2 -> 2 -> 3 -> 1 -> 1
+
+↓
+
+1 -> 2 -> 3 -> 1
+
+Implementá:
+
+Nodo* compressQueue(Nodo* front);
+
+⚠️ Restricciones:
+- Debe ser estrictamente recursiva — NO loops
+- Debe liberar nodos duplicados
+- Retorna el nuevo front
+
+NOTA:
+Asumir que rear será recalculado externamente si hace falta.
+(Trabajar solo sobre la cadena enlazada)
+*/
+
+// DESARROLLE SU FUNCION AQUI
+
+
+
+/*
+============================================================
+PREGUNTA 3 — Debugging de Stack Corrupto
+============================================================
+
+Un desarrollador implementó el siguiente pop:
+
+Nodo* pop(Nodo* top){
+    top = top->next;
+    delete top;
+    return top;
+}
+
+Tu tarea:
+1. Identificar el bug crítico
+2. Corregir la función
+3. Justificar brevemente en comentario
+*/
+
+// DESARROLLE SU FUNCION AQUI
+
+
+
+/*
+============================================================
+PREGUNTA 4 — Invariantes Estructurales
+============================================================
+
+Nombrar 3 invariantes estructurales válidos
+para un stack enlazado implementado con:
+
+Nodo* top;
+*/
+
+// RESPUESTA AQUI
+
+
+
+/*
+============================================================
+PREGUNTA 5 — Análisis Conceptual
+============================================================
+
+En un sistema crítico, un junior propone implementar TODAS
+las operaciones de stack/queue recursivamente "porque queda más elegante".
+
+¿Cuál es el principal riesgo técnico de esa decisión?
+
+Responder en comentario justificando brevemente.
+*/
+
+// RESPUESTA AQUI
+
+
+
+int main() {
+    return 0;
+}
