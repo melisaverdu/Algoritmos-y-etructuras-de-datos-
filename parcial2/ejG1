@@ -1,0 +1,63 @@
+#include <iostream>
+#include <vector>
+#include <queue>
+#include <utility>
+
+using namespace std;
+
+/*
+================================================================================
+CONSIGNA:
+En el juego de ajedrez el caballo puede moverse en L (2 casillas en una dirección 
+y 1 casilla en otra dirección transversal).
+Desarrollar la función saltosMinimosCaballo(N, inicio, fin), que permita 
+determinar la cantidad de movimientos mínimos del caballo para ir de una 
+posición a otra del tablero[cite: 1].
+
+N : Número de casillas del tablero (NxN).
+inicio: par (x, y) de la posición de inicio.
+fin: par (x, y) de la posición final.
+
+Pistas del parcial:
+- Se considera cada posición del tablero como un vértice de forma implícita.
+- Utilizamos una matriz de visitados para no repetir posiciones.
+- Realizamos un BFS hasta llegar al nodo destino[cite: 4].
+- Los desplazamientos válidos en L se calculan con los siguientes arrays[cite: 1]:
+  int dx[] = {-2, -1, 1, 2, 2, 1, -1, -2};
+  int dy[] = {-1, -2, -2, -1, 1, 2, 2, 1};
+================================================================================
+*/
+
+int saltosMinimosCaballo(int N, pair<int, int> inicio, pair<int, int> fin) {
+    // Los 8 movimientos posibles del caballo en el eje X y eje Y [cite: 1]
+    int dx[] = {-2, -1, 1, 2, 2, 1, -1, -2};
+    int dy[] = {-1, -2, -2, -1, 1, 2, 2, 1};
+
+    // 1. TODO: Definir e inicializar las estructuras necesarias 
+    // (Matriz de visitados, matriz de distancias o estructura en la cola).
+    int dist[N][N]; // Matriz para almacenar la distancia (cantidad de movimientos)
+    bool visitado[N][N]; // Matriz para marcar las posiciones visitadas
+
+    // 2. TODO: Configurar el estado inicial antes de empezar a buscar.
+
+    // 3. TODO: Implementar el bucle principal de la búsqueda en amplitud (BFS).
+
+
+    return -1; // En caso de que no haya un camino válido
+}
+
+int main() {
+    int N = 8;
+    
+    // Prueba 1: Ir desde una esquina a la esquina opuesta
+    pair<int, int> inicio1 = {0, 0};
+    pair<int, int> fin1 = {7, 7};
+    cout << "Prueba 1 - Esperado: 6 | Conseguido: " << saltosMinimosCaballo(N, inicio1, fin1) << endl;
+
+    // Prueba 2: Movimiento directo de una L
+    pair<int, int> inicio2 = {0, 0};
+    pair<int, int> fin2 = {1, 2};
+    cout << "Prueba 2 - Esperado: 1 | Conseguido: " << saltosMinimosCaballo(N, inicio2, fin2) << endl;
+
+    return 0;
+}

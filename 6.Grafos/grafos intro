@@ -1,0 +1,64 @@
+/* Paso 1: ¿Cómo se representa un grafo en C++?
+
+Un grafo es un conjunto de nodos (o vértices) conectados por aristas (enlaces).
+En los parciales, la forma estándar y más eficiente en memoria para representarlos es la Lista de Adyacencia. 
+Básicamente, es un arreglo (o vector) donde cada posición tiene una lista con sus vecinos.
+
+Código base introductorio (Grafo No Dirigido):
+Imaginá que tenés un grafo con nodos numerados del 0 al V−1. Así se ve la estructura clásica:
+*/
+#include <iostream>
+#include <vector>
+
+using namespace std;
+
+class Grafo {
+private:
+    int V; // Cantidad de vértices
+    vector<vector<int>> adj; // Lista de adyacencia (vector de vectores)
+
+public:
+    // Constructor
+    Grafo(int vertices) {
+        V = vertices;
+        adj.resize(vertices);
+    }
+
+    // Agregar arista (conexión bidireccional si es no dirigido)
+    void agregarArista(int u, int v) {
+        adj[u].push_back(v);
+        adj[v].push_back(u); // Si fuera dirigido, esta línea no va.
+    }
+};
+
+/*
+Paso 2: Los recorridos esenciales (DFS y BFS)
+
+Para resolver cualquier problema, necesitás "caminar" por el grafo. Hay dos formas de hacerlo:
+A. DFS (Depth First Search - Búsqueda en Profundidad)
+
+Va "lo más profundo posible" antes de retroceder. Se usa muchísimo de forma recursiva. Es ideal para saber si
+un nodo alcanza a otro, contar islas/componentes, o colorear grafos.
+
+    Secreto de examen: Siempre necesitás un arreglo o vector de visitados (booleanos) para no quedarte atrapado
+    en un bucle infinito si hay ciclos.
+*/
+void dfsAuxiliar(int nodo, vector<bool>& visitado) {
+    visitado[nodo] = true; // Lo marcamos como visitado
+    
+    // Revisamos todos los vecinos del nodo actual
+    for (int vecino : adj[nodo]) {
+        if (!visitado[vecino]) {
+            dfsAuxiliar(vecino, visitado); // Llamada recursiva
+        }
+    }
+}
+
+/*
+B. BFS (Breadth First Search - Búsqueda en Amplitud)
+
+Explora en forma de "ola" o por niveles: primero los vecinos directos, luego los vecinos de los vecinos, etc.
+
+    Secreto de examen: Utiliza una Cola (queue) y sirve exclusivamente para encontrar el camino más corto 
+    (en cantidad de aristas o movimientos) en grafos donde todas las conexiones valen lo mismo.
+*/
