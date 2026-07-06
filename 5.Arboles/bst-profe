@@ -1,0 +1,347 @@
+
+
+#ifndef BST_CLINICAS_HPP
+#define BST_CLINICAS_HPP
+
+#include <cstddef>
+#include <iostream>
+#include <string>
+#include <vector>
+
+/**
+ * @brief Representa una clínica indexada dentro del sistema médico de CyberCórdoba.
+ *
+ * El campo codigoClinica funciona como clave de ordenamiento dentro del BST.
+ */
+struct ClinicaIndexada
+{
+    int codigoClinica;
+    std::string nombre;
+    std::string barrio;
+    int nivelRiesgo; // 0=bajo, 1=medio, 2=alto
+};
+
+/**
+ * @brief Árbol binario de búsqueda para indexar clínicas por código.
+ *
+ * Esta implementación usa raw pointers para mostrar explícitamente
+ * cómo se administra la memoria dinámica.
+ *
+ * Importante para trainees:
+ * - Cada nodo se crea con new.
+ * - Cada nodo debe liberarse con delete.
+ * - La clase es responsable de destruir todos los nodos en su destructor.
+ *
+ * La clave de ordenamiento es ClinicaIndexada::codigoClinica.
+ */
+class BstClinicas
+{
+private:
+    /**
+     * @brief Nodo interno del BST.
+     *
+     * Cada nodo conoce:
+     * - su dato;
+     * - su hijo izquierdo;
+     * - su hijo derecho.
+     */
+    struct Node
+    {
+        ClinicaIndexada data;
+        Node* left;
+        Node* right;
+
+        /**
+         * @brief Construye un nodo hoja.
+         *
+         * @param value Clínica que se almacenará en el nodo.
+         */
+        explicit Node(const ClinicaIndexada& value)
+            : data(value)
+            , left(nullptr)
+            , right(nullptr)
+        {
+        }
+    };
+
+    Node* m_root;
+    std::size_t m_size;
+
+    /**
+     * @brief Libera recursivamente todos los nodos de un subárbol.
+     *
+     * Este método es fundamental cuando se usan raw pointers.
+     *
+     * Primero destruye los hijos y después destruye el nodo actual.
+     * Ese orden evita perder referencias a los subárboles.
+     *
+     * @param node Raíz del subárbol a destruir.
+     */
+    void destroyRecursive(Node* node) noexcept
+    {
+        if (node == nullptr)
+        {
+            return;
+        }
+
+        destroyRecursive(node->left);
+        destroyRecursive(node->right);
+
+        delete node;
+    }
+
+    /**
+     * @brief Inserta o actualiza una clínica en un subárbol.
+     *
+     * Se recibe Node*& porque el método puede modificar el puntero recibido.
+     * Por ejemplo, si node es nullptr, se crea un nuevo nodo y se asigna ahí.
+     *
+     * @param node Referencia al puntero del nodo actual.
+     * @param value Clínica a insertar o actualizar.
+     */
+    void insertRecursive(Node*& node, const ClinicaIndexada& value)
+    {
+        if (node == nullptr)
+        {
+            node = new Node(value);
+            ++m_size;
+            return;
+        }
+
+        //  40 - ROOT
+        //  / \  
+        // 20 60
+
+        if (value.codigoClinica < node->data.codigoClinica)
+        {
+            insertRecursive(node->left, value);
+        }
+        else if (value.codigoClinica > node->data.codigoClinica)
+        {
+            insertRecursive(node->right, value);
+        }
+        else
+        {
+            // Si la clave ya existe, se actualiza el dato.
+            // No se incrementa m_size porque no aparece una nueva clínica.
+            node->data = value;
+        }
+    }
+
+    /**
+     * @brief Busca una clínica dentro de un subárbol.
+     *
+     * @param node Nodo actual.
+     * @param codigoClinica Código buscado.
+     *
+     * @return Puntero constante al dato encontrado, o nullptr si no existe.
+     */
+    const ClinicaIndexada* findRecursive(const Node* node, int codigoClinica) const
+    {
+        if (node == nullptr)
+        {
+            return nullptr;
+        }
+
+        if (codigoClinica < node->data.codigoClinica)
+        {
+            return findRecursive(node->left, codigoClinica);
+        }
+
+        if (codigoClinica > node->data.codigoClinica)
+        {
+            return findRecursive(node->right, codigoClinica);
+        }
+
+        return &node->data;
+    }
+
+    /**
+     * @brief Imprime el subárbol en orden ascendente.
+     *
+     * Recorrido in-order:
+     * 1. Izquierda.
+     * 2. Nodo actual.
+     * 3. Derecha.
+     *
+     * En un BST, este recorrido devuelve las claves ordenadas.
+     *
+     * @param node Nodo actual.
+     */
+    void inOrderPrintRecursive(const Node* node) const
+    {
+        if (node == nullptr)
+        {
+            return;
+        }
+
+        inOrderPrintRecursive(node->left);
+
+        std::cout << node->data.codigoClinica << " | " << node->data.barrio << " | " << node->data.nombre
+                  << " | riesgo " << node->data.nivelRiesgo << '\n';
+
+        inOrderPrintRecursive(node->right);
+    }
+
+    /**
+     * @brief Guarda los códigos del subárbol en orden ascendente.
+     *
+     * @param node Nodo actual.
+     * @param result Vector donde se acumulan los códigos.
+     */
+    void inOrderCodesRecursive(const Node* node, std::vector<int>& result) const
+    {
+        if (node == nullptr)
+        {
+            return;
+        }
+
+        inOrderCodesRecursive(node->left, result);
+        result.push_back(node->data.codigoClinica);
+        inOrderCodesRecursive(node->right, result);
+    }
+
+    /**
+     * @brief Calcula recursivamente la altura de un subárbol.
+     *
+     * Convención:
+     * - Árbol vacío: altura 0.
+     * - Árbol con un nodo: altura 1.
+     *
+     * @param node Nodo actual.
+     *
+     * @return Altura del subárbol.
+     */
+    int heightRecursive(const Node* node) const noexcept
+    {
+        if (node == nullptr)
+        {
+            return 0;
+        }
+
+        const int leftHeight = heightRecursive(node->left);
+        const int rightHeight = heightRecursive(node->right);
+
+        return 1 + (leftHeight > rightHeight ? leftHeight : rightHeight);
+    }
+
+public:
+    /**
+     * @brief Construye un BST vacío.
+     */
+    BstClinicas()
+        : m_root(nullptr)
+        , m_size(0)
+    {
+    }
+
+    /**
+     * @brief Destruye el árbol y libera todos los nodos.
+     */
+    ~BstClinicas()
+    {
+        destroyRecursive(m_root);
+        m_root = nullptr;
+        m_size = 0;
+    }
+
+    /**
+     * @brief Deshabilita copia para evitar shallow copy de raw pointers.
+     *
+     * Si copiáramos el árbol por defecto, dos objetos apuntarían
+     * a los mismos nodos y ambos intentarían liberarlos.
+     */
+    BstClinicas(const BstClinicas&) = delete;
+
+    /**
+     * @brief Deshabilita asignación por copia para evitar doble liberación.
+     */
+    BstClinicas& operator=(const BstClinicas&) = delete;
+
+    /**
+     * @brief Inserta o actualiza una clínica.
+     *
+     * @param value Clínica a insertar o actualizar.
+     */
+    void insert(const ClinicaIndexada& value)
+    {
+        insertRecursive(m_root, value);
+    }
+
+    /**
+     * @brief Indica si existe una clínica con el código indicado.
+     *
+     * @param codigoClinica Código buscado.
+     *
+     * @return true si existe, false en caso contrario.
+     */
+    bool contains(int codigoClinica) const
+    {
+        return find(codigoClinica) != nullptr;
+    }
+
+    /**
+     * @brief Busca una clínica por código.
+     *
+     * @param codigoClinica Código buscado.
+     *
+     * @return Puntero constante al dato encontrado, o nullptr si no existe.
+     */
+    const ClinicaIndexada* find(int codigoClinica) const
+    {
+        return findRecursive(m_root, codigoClinica);
+    }
+
+    /**
+     * @brief Imprime todas las clínicas ordenadas por código.
+     */
+    void inOrderPrint() const
+    {
+        inOrderPrintRecursive(m_root);
+    }
+
+    /**
+     * @brief Devuelve los códigos ordenados de menor a mayor.
+     *
+     * @return Vector de códigos en orden ascendente.
+     */
+    std::vector<int> inOrderCodes() const
+    {
+        std::vector<int> result;
+        inOrderCodesRecursive(m_root, result);
+        return result;
+    }
+
+    /**
+     * @brief Devuelve la cantidad de clínicas únicas almacenadas.
+     *
+     * @return Cantidad de nodos del árbol.
+     */
+    std::size_t size() const noexcept
+    {
+        return m_size;
+    }
+
+    /**
+     * @brief Indica si el árbol está vacío.
+     *
+     * @return true si no contiene nodos.
+     */
+    bool isEmpty() const noexcept
+    {
+        return m_size == 0;
+    }
+
+    /**
+     * @brief Devuelve la altura actual del árbol.
+     *
+     * @return Altura del BST.
+     */
+    int height() const noexcept
+    {
+        return heightRecursive(m_root);
+    }
+};
+
+#endif
+

@@ -1,0 +1,377 @@
+/*
+EJERCICIO 1 — BST: Búsqueda por código
+Enunciado
+
+CyberCórdoba Trenes — Registro operativo de convoyes prioritarios
+
+Durante la madrugada, el Centro de Control Ferroviario recibe solicitudes de despacho desde distintos nodos de
+ la ciudad. Cada solicitud incluye el código operativo de un tren.
+
+Para evitar recorrer todo el registro linealmente, los trenes se almacenan en un Árbol Binario de Búsqueda (BST)
+ordenado por Tren.codigo.
+
+Implementar:
+
+ResultadoBusqueda RegistroTrenes::buscarPorCodigo(int codigoBuscado);
+
+Debe devolver:
+
+ResultadoBusqueda(true, tren)
+
+si existe un tren con ese código.
+
+o
+
+ResultadoBusqueda(false, Tren())
+
+si no existe.
+
+Restricciones
+-Usar la propiedad del BST.
+-No recorrer ambos subárboles.
+-No usar STL.
+-No modificar el árbol.
+
+*/
+
+#include <iostream>
+#include <string>
+
+struct Tren {
+    int codigo;
+    std::string linea;
+    int prioridadOperativa;
+
+    Tren(int codigoTren = -1,
+         std::string lineaTren = "",
+         int prioridad = 0)
+        : codigo(codigoTren),
+          linea(lineaTren),
+          prioridadOperativa(prioridad) {}
+};
+
+struct ResultadoBusqueda {
+    bool encontrado;
+    Tren tren;
+
+    ResultadoBusqueda(bool fueEncontrado = false,
+                      Tren trenEncontrado = Tren())
+        : encontrado(fueEncontrado),
+          tren(trenEncontrado) {}
+};
+
+class NodoTren {
+public:
+    Tren dato;
+    NodoTren* izquierdo;
+    NodoTren* derecho;
+
+    explicit NodoTren(Tren tren)
+        : dato(tren),
+          izquierdo(nullptr),
+          derecho(nullptr) {}
+};
+
+class RegistroTrenes {
+private:
+    NodoTren* raiz;
+
+public:
+    RegistroTrenes() : raiz(nullptr) {}
+
+    ResultadoBusqueda buscarPorCodigo(int codigoBuscado);
+};
+
+
+ResultadoBusqueda RegistroTrenes::buscarPorCodigo(int codigoBuscado) {
+    // IMPLEMENTAR RESOLUCIÓN
+    NodoTren* actual = raiz;
+
+    while(actual != nullptr){
+
+        if(actual->dato.codigo == codigoBuscado){
+            return ResultadoBusqueda(true, actual->dato);
+        }
+        else if(actual->dato.codigo > codigoBuscado){
+            actual = actual->izquierdo;
+        }
+    }
+}
+
+/*
+Pregunta 2
+
+CyberCórdoba Trenes — Evacuación por túneles operativos
+Una tormenta electromagnética dejó fuera de servicio algunas estaciones del sistema nocturno. El centro de control 
+debe decidir cuántos transbordos mínimos necesita un equipo técnico para viajar desde una estación origen hasta una 
+estación destino usando solamente estaciones operativas.
+
+La red se modela como un grafo no ponderado:
+-Cada estación es un nodo.
+-Cada túnel bidireccional es una arista.
+-Cada túnel cuesta exactamente 1 transbordo.
+
+Como todas las aristas tienen el mismo costo, la estrategia correcta es explorar por niveles usando BFS.
+
+Implemente exactamente este método:
+int RedTrenes::minimoTransbordosSeguros(int origenId, int destinoId)
+Debe devolver:
+-1 si algún id es inválido.
+-1 si origen o destino no están operativos.
+-1 si no existe ruta segura.
+-0 si origen y destino son la misma estación operativa.
+-La mínima cantidad de transbordos en cualquier otro caso
+
+Restricciones:
+Use Queue<EstadoBusqueda>.
+No use std::queue.
+No use vector.
+No use recursión
+*/
+
+template <typename TData>
+class Queue {
+public:
+    Queue();
+    // Agrega value al final de la cola.
+    void enqueue(const TData& value);
+
+    // Elimina el elemento del frente. Si la cola está vacía, no hace nada.
+    void dequeue();
+
+    // Devuelve una COPIA del elemento del frente.
+    // Solo debe llamarse si isEmpty() == false
+    TData front() const;
+    
+    // Devuelve true si la cola no tiene elementos.
+    bool isEmpty() const;
+    
+    // Devuelve la cantidad de elementos actuales.
+    int size() const;
+};
+struct Estacion {
+    std::string nombre;
+    bool operativa; Estacion(std::string nombreEstacion = "", bool estaOperativa = true);
+};
+struct EstadoBusqueda {
+    int estacionId; int distancia; EstadoBusqueda(int id = -1, int dist = 0);
+};
+class RedTrenes {
+private:
+    static const int MAX_ESTACIONES = 20;
+    Estacion estaciones[MAX_ESTACIONES];
+    bool hayTunel[MAX_ESTACIONES][MAX_ESTACIONES];
+    int cantidadEstaciones;
+
+public:
+    RedTrenes();
+    int agregarEstacion(std::string nombre, bool operativa = true);
+
+    void cambiarEstadoOperativo(int estacionId, bool operativa);
+
+    void conectarBidireccional(int origenId, int destinoId);
+
+    // Método a implementar.
+    int minimoTransbordosSeguros(int origenId, int destinoId){
+        //verifico variables
+        if(origenId < 0 || origenId >= cantidadEstaciones || destinoId < 0 || destinoId >=cantidadEstaciones){
+            return -1
+        }
+
+        if(origenId==destinoId){
+            return 0;
+        }
+
+        //declaro
+        bool visitados[MAX_ESTACIONES];
+        int distancia[MAX_ESTACIONES]; //esto también para encontrar la mas lejana
+        Queue<int> q;
+
+        //inicializo
+        if(int i=0; i<cantidadEstaciones; i++){
+            visitados[i]=false;
+            distancia[i]=0;
+        }
+
+        //reviso origen
+        visitados[origenId]=true;
+        distancia[origenId]=0;
+        q.enqueue(origenId);
+
+        while(!q.isEmpty()){
+            auto actual = q.front();
+            q.dequeue();
+            
+            if(actual==destinoId){ //si el actual con el que estoy trabajando es el destino que busco
+                return distancia[actual];
+            }
+
+            //en el caso de no encontrarla 
+            //me fijo en los vecinos de estos
+            for(int v=0; v<cantidadEstaciones; v++){
+                if(!visitados[v] && hayTunel[actual][v] && estaciones[actual].operativa){
+                    visitados[actual]=true;
+                    q.enqueue(actual);
+                    distancia[v]=distancia[actual]+1;
+                }
+            }
+        }
+        return -1;
+
+
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+       /* //verifico origen y destino 
+        if(origenId < 0 || origenId >= cantidadEstaciones || destinoId < 0 || destinoId >= cantidadEstaciones){
+            return -1;
+        } 
+        //-1 si origen o destino no están operativos.
+        if(!estaciones[origenId].operativa || !estaciones[destinoId].operativa){
+            return -1;
+        }
+        //-0 si origen y destino son la misma estación operativa.
+        if(origenId == destinoId){
+            return 0;
+        }
+        //-1 si no existe ruta segura.
+
+        bool visitados[MAX_ESTACIONES];
+        int distancia[MAX_ESTACIONES];
+        
+        for(int i=0; i<cantidadEstaciones; i++){
+            visitados[i] = false; //no visitamos anda aun 
+            distancia[i]=0; //todas las distancias son 0
+        }
+        
+        //no declaro cola porque ya la tengo
+        visitados[origenId] = true; // marco origen como visitado
+        distancia[origenId]=0; //como estamos en el origen la distancia es 0
+        Queue<int>q; //declaro la cola 
+        q.enqueue(origenId);// encolo el origen que ya visité
+
+        while (!q.isEmpty()){ //mientras que la cola no este vacía
+            auto actual = q.front(); //lo pongo al frente en la cola
+            q.dequeue(); //lo sacamos porque sino va a seguir siempre en el while
+             
+            if(actual==destinoId){
+                return distancia[actual];
+            } 
+            
+            for(int v = 0; v < cantidadEstaciones; v++){ //me quiero mover por todos los nodos que estan conectados por los vecinos
+                if(!visitados[v] && estaciones[v].operativa && hayTunel[actual][v]){
+                    visitados[v] = true; //marco como que visité
+                    q.enqueue(v);
+                    distancia[v]=distancia[actual]+1;
+                }
+
+            }
+        
+        }
+        return -1;*/
+};
+
+/*
+CyberCórdoba Trenes — Diagnóstico de sector operativo 
+Luego de un sabotaje sobre la red de túneles, el equipo de monitoreo necesita saber cuántas estaciones 
+operativas siguen conectadas al sector donde se encuentra una cuadrilla técnica. La red se modela como un 
+grafo no ponderado. Desde una estación origen se debe recorrer en profundidad y contar solo estaciones operativas alcanzables. 
+
+Implemente exactamente estos métodos: 
+int RedDiagnostico::contarDFS(int estacionId, bool visitada[]); 
+int RedDiagnostico::contarEstacionesOperativasDesde(int origenId); 
+
+contarEstacionesOperativasDesde debe devolver 0 si el id es inválido o si la estación origen no está operativa.
+
+Restricciones: 
+-Use DFS recursivo. 
+-No use queue, stack, vector ni estructuras auxiliares dinámicas. 
+-Use el arreglo visitada provisto para evitar ciclos.
+*/
+
+struct Estacion {    
+    std::string nombre;    
+    bool operativa;    
+    Estacion(std::string nombreEstacion = "", bool estaOperativa = true); }; 
+        
+class RedDiagnostico { 
+    private:    
+        static const int MAX_ESTACIONES = 20;    
+        Estacion estaciones[MAX_ESTACIONES];    
+        bool hayTunel[MAX_ESTACIONES][MAX_ESTACIONES];    
+        int cantidadEstaciones;    
+        // Helper recursivo a implementar.    
+        int contarDFS(int estacionId, bool visitada[]); 
+
+    public:    
+        RedDiagnostico();    
+        int agregarEstacion(std::string nombre, bool operativa = true);    
+        void conectarBidireccional(int origenId, int destinoId);    
+        
+        // Método público a implementar.    
+        int contarEstacionesOperativasDesde(int origenId); 
+
+int RedDiagnostico::contarDFS(int estacionId, bool visitada[]) {
+    visitada[estacionId]=true;
+    int contador=-1;
+
+    for(int i=0; i<cantidadEstaciones; i++){
+        if(!visitada[i] && hayTunel[estacionId][i]){
+            contador+=contarDFS(i,visitada);
+        }
+    }
+    return contador;
+    
+}   
+
+int RedDiagnostico::contarEstacionesOperativasDesde(int origenId) {
+    //implementar aca
+    if(origenId < 0 || origenId >= cantidadEstaciones){
+        return 0;
+    }
+    if(!estaciones[origenId].operativa){
+        return 0;
+    }
+
+    bool visitado[cantidadEstaciones];
+    for(int v = 0; v < cantidadEstaciones; v++){
+        visitado[v] = 0;
+    }
+
+    return contarDFS(origenId, visitado);
+}
+};
+
+/

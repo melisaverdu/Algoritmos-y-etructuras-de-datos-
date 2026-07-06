@@ -1,0 +1,154 @@
+#include <iostream>
+#include <string>
+using namespace std;
+
+/*
+Enunciado:
+
+CyberCórdoba Trenes — Monitor AVL de estaciones críticas
+
+El sistema de observabilidad registra estaciones críticas en un árbol AVL
+ordenado por EstacionCritica.id.
+
+El factor de balance se define como:
+
+    altura(subárbol izquierdo) - altura(subárbol derecho)
+
+Consideraciones:
+
+    - Altura de árbol vacío = 0
+    - Altura de hoja = 1
+
+Implementar:
+
+    int MonitorAVL::alturaDe(NodoAVL* nodo);
+    int MonitorAVL::factorBalanceDe(int estacionId);
+
+factorBalanceDe debe devolver 999 si la estación no existe.
+
+Restricciones:
+
+    - Usar recursión para calcular altura.
+    - Usar la propiedad ABB para buscar la estación.
+    - No usar estructuras auxiliares.
+*/
+
+struct EstacionCritica {
+    int id;
+    string nombre;
+
+    EstacionCritica(int idEstacion = -1, string nombreEstacion = ""): id(idEstacion), nombre(nombreEstacion) {}
+};
+
+class NodoAVL {
+public:
+    EstacionCritica dato;
+    NodoAVL* izquierdo;
+    NodoAVL* derecho;
+
+    explicit NodoAVL(EstacionCritica estacion)
+        : dato(estacion),
+          izquierdo(nullptr),
+          derecho(nullptr) {}
+};
+
+class MonitorAVL {
+private:
+    NodoAVL* raiz;
+
+    NodoAVL* insertarRec(NodoAVL* nodo, EstacionCritica estacion) {
+
+        if (nodo == nullptr)
+            return new NodoAVL(estacion);
+
+        if (estacion.id < nodo->dato.id)
+            nodo->izquierdo = insertarRec(nodo->izquierdo, estacion);
+
+        else if (estacion.id > nodo->dato.id)
+            nodo->derecho = insertarRec(nodo->derecho, estacion);
+
+        return nodo;
+    }
+
+public:
+    MonitorAVL() {
+        raiz = nullptr;
+    }
+
+    void insertarParaTest(EstacionCritica estacion) {
+        raiz = insertarRec(raiz, estacion);
+    }
+
+    // ====================================================
+    // IMPLEMENTAR
+    // ====================================================
+
+    int alturaDe(NodoAVL* nodo) {
+
+        // TODO:
+        // 1. Caso base
+        // 2. Obtener altura izquierda
+        // 3. Obtener altura derecha
+        // 4. Retornar altura
+
+        if(nodo == nullptr){
+            return 0;
+        }
+
+        int altizq = alturaDe(nodo->izquierdo);
+        int altder = alturaDe(nodo->derecho);
+
+        return 1 + max(altder, altizq);
+    }
+
+    int factorBalanceDe(int estacionId) {
+
+         NodoAVL* actual = raiz;
+
+        while(actual != nullptr){
+        // Encontré la estación
+            if(estacionId == actual->dato.id){
+                return alturaDe(actual->izquierdo) - alturaDe(actual->derecho);
+        }
+
+        // Buscar por propiedad ABB
+        if(estacionId < actual->dato.id)
+        {
+            actual = actual->izquierdo;
+        }
+        else
+        {
+            actual = actual->derecho;
+        }
+    }
+
+    // No existe la estación
+    return 999;
+    }
+};
+
+int main() {
+
+    MonitorAVL monitor;
+
+    monitor.insertarParaTest(EstacionCritica(50, "Central"));
+    monitor.insertarParaTest(EstacionCritica(30, "Neon"));
+    monitor.insertarParaTest(EstacionCritica(70, "Docks"));
+    monitor.insertarParaTest(EstacionCritica(20, "Sur"));
+
+    cout << "--- PRUEBAS ---" << endl;
+
+    cout << "Balance de 50 (Esperado: 1): "
+         << monitor.factorBalanceDe(50) << endl;
+
+    cout << "Balance de 30 (Esperado: 1): "
+         << monitor.factorBalanceDe(30) << endl;
+
+    cout << "Balance de 70 (Esperado: 0): "
+         << monitor.factorBalanceDe(70) << endl;
+
+    cout << "Balance de 999 (Esperado: 999): "
+         << monitor.factorBalanceDe(999) << endl;
+
+    return 0;
+}

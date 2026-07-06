@@ -1,0 +1,532 @@
+
+
+#ifndef AVL_DRONES_MEDICOS_HPP
+#define AVL_DRONES_MEDICOS_HPP
+
+#include <cstddef>
+#include <string>
+#include <vector>
+
+/**
+ * @brief Representa un dron médico del sistema de emergencias de CyberCórdoba.
+ *
+ * El campo codigoDron funciona como clave de ordenamiento dentro del AVL.
+ */
+struct DronMedico
+{
+    int codigoDron;
+    std::string zonaAsignada;
+    int nivelBateria;    // 0 a 100
+    int prioridadMedica; // 0=normal, 1=urgente, 2=crítica
+};
+
+/**
+ * @brief Árbol AVL para indexar drones médicos por código usando raw pointers.
+ *
+ * Un AVL es un árbol binario de búsqueda autobalanceado.
+ *
+ * Después de cada inserción:
+ * - Se actualizan alturas.
+ * - Se calcula el factor de balance.
+ * - Se aplican rotaciones si el nodo quedó desbalanceado.
+ *
+ * Factor de balance:
+ *
+ * altura(izquierda) - altura(derecha)
+ *
+ * Valores válidos:
+ * - -1
+ * -  0
+ * -  1
+ */
+class AvlDronesMedicos
+{
+private:
+    /**
+     * @brief Nodo interno del árbol AVL.
+     *
+     * Además del dato y los punteros a hijos, almacena altura.
+     */
+    struct Node
+    {
+        DronMedico data;
+        Node* left;
+        Node* right;
+        int height;
+
+        /**
+         * @brief Construye un nodo hoja con altura inicial 1.
+         *
+         * @param value Dron a almacenar.
+         */
+        explicit Node(const DronMedico& value)
+            : data(value)
+            , left(nullptr)
+            , right(nullptr)
+            , height(1)
+        {
+        }
+    };
+
+    Node* m_root;
+    std::size_t m_size;
+
+    /**
+     * @brief Libera recursivamente todos los nodos de un subárbol.
+     *
+     * @param node Nodo raíz del subárbol a destruir.
+     */
+    void destroyRecursive(Node* node) noexcept
+    {
+        if (node == nullptr)
+        {
+            return;
+        }
+
+        destroyRecursive(node->left);
+        destroyRecursive(node->right);
+
+        delete node;
+    }
+
+    /**
+     * @brief Devuelve la altura de un nodo.
+     *
+     * @param node Nodo consultado.
+     *
+     * @return Altura del nodo, o 0 si es nullptr.
+     */
+    int nodeHeight(const Node* node) const noexcept
+    {
+        return node == nullptr ? 0 : node->height;
+    }
+
+    /**
+     * @brief Devuelve el mayor de dos valores.
+     *
+     * @param a Primer valor.
+     * @param b Segundo valor.
+     *
+     * @return Máximo entre a y b.
+     */
+    int maxValue(int a, int b) const noexcept
+    {
+        return a > b ? a : b;
+    }
+
+    /**
+     * @brief Actualiza la altura almacenada de un nodo.
+     *
+     * @param node Nodo cuya altura se actualizará.
+     */
+    void updateHeight(Node* node) noexcept
+    {
+        if (node == nullptr)
+        {
+            return;
+        }
+
+        node->height = 1 + maxValue(nodeHeight(node->left), nodeHeight(node->right));
+    }
+
+    /**
+     * @brief Calcula el factor de balance de un nodo.
+     *
+     * @param node Nodo consultado.
+     *
+     * @return altura(izquierda) - altura(derecha).
+     */
+    int balanceFactor(const Node* node) const noexcept
+    {
+        if (node == nullptr)
+        {
+            return 0;
+        }
+
+        return nodeHeight(node->left) - nodeHeight(node->right);
+    }
+
+    /**
+     * @brief Aplica una rotación simple hacia la derecha.
+     *
+     * Corrige principalmente el caso LL.
+     *
+     * Antes:
+     *
+     *       y
+     *      /
+     *     x
+     *      \
+     *       T2
+     *
+     * Después:
+     *
+     *       x
+     *        \
+     *         y
+     *
+     * @param y Raíz del subárbol desbalanceado.
+     *
+     * @return Nueva raíz del subárbol.
+     */
+    Node* rotateRight(Node* y)
+    {
+        Node* x = y->left;
+        Node* t2 = x->right;
+
+        x->right = y;
+        y->left = t2;
+
+        updateHeight(y);
+        updateHeight(x);
+
+        return x;
+    }
+
+    /**
+     * @brief Aplica una rotación simple hacia la izquierda.
+     *
+     * Corrige principalmente el caso RR.
+     *
+     * Antes:
+     *
+     *     x
+     *      \
+     *       y
+     *      /
+     *     T2
+     *
+     * Después:
+     *
+     *       y
+     *      /
+     *     x
+     *
+     * @param x Raíz del subárbol desbalanceado.
+     *
+     * @return Nueva raíz del subárbol.
+     */
+    Node* rotateLeft(Node* x)
+    {
+        Node* y = x->right;
+        Node* t2 = y->left;
+
+        y->left = x;
+        x->right = t2;
+
+        updateHeight(x);
+        updateHeight(y);
+
+        return y;
+    }
+
+    /**
+     * @brief Rebalancea un nodo AVL si quedó fuera de rango.
+     *
+     * Casos:
+     *
+     * LL:
+     * - balance > 1
+     * - balance del hijo izquierdo >= 0
+     * - rotación derecha.
+     *
+     * LR:
+     * - balance > 1
+     * - balance del hijo izquierdo < 0
+     * - rotación izquierda sobre hijo izquierdo y luego derecha.
+     *
+     * RR:
+     * - balance < -1
+     * - balance del hijo derecho <= 0
+     * - rotación izquierda.
+     *
+     * RL:
+     * - balance < -1
+     * - balance del hijo derecho > 0
+     * - rotación derecha sobre hijo derecho y luego izquierda.
+     *
+     * @param node Nodo a rebalancear.
+     *
+     * @return Nueva raíz del subárbol.
+     */
+    Node* rebalance(Node* node)
+    {
+        if (node == nullptr)
+        {
+            return nullptr;
+        }
+
+        updateHeight(node);
+
+        const int balance = balanceFactor(node);
+
+        if (balance > 1)
+        {
+            if (balanceFactor(node->left) < 0)
+            {
+                node->left = rotateLeft(node->left);
+            }
+
+            return rotateRight(node);
+        }
+
+        if (balance < -1)
+        {
+            if (balanceFactor(node->right) > 0)
+            {
+                node->right = rotateRight(node->right);
+            }
+
+            return rotateLeft(node);
+        }
+
+        return node;
+    }
+
+    /**
+     * @brief Inserta o actualiza un dron dentro de un subárbol AVL.
+     *
+     * La inserción comienza como en un BST.
+     * Luego se rebalancea al volver de la recursión.
+     *
+     * @param node Nodo actual.
+     * @param value Dron a insertar o actualizar.
+     *
+     * @return Nueva raíz del subárbol.
+     */
+    Node* insertRecursive(Node* node, const DronMedico& value)
+    {
+        if (node == nullptr)
+        {
+            ++m_size;
+            return new Node(value);
+        }
+
+        if (value.codigoDron < node->data.codigoDron)
+        {
+            node->left = insertRecursive(node->left, value);
+        }
+        else if (value.codigoDron > node->data.codigoDron)
+        {
+            node->right = insertRecursive(node->right, value);
+        }
+        else
+        {
+            // Si el código ya existe, se actualizan los datos.
+            // No se incrementa m_size.
+            node->data = value;
+            return node;
+        }
+
+        return rebalance(node);
+    }
+
+    /**
+     * @brief Busca un dron dentro de un subárbol.
+     *
+     * @param node Nodo actual.
+     * @param codigoDron Código buscado.
+     *
+     * @return Puntero constante al dron encontrado, o nullptr si no existe.
+     */
+    const DronMedico* findRecursive(const Node* node, int codigoDron) const
+    {
+        if (node == nullptr)
+        {
+            return nullptr;
+        }
+
+        if (codigoDron < node->data.codigoDron)
+        {
+            return findRecursive(node->left, codigoDron);
+        }
+
+        if (codigoDron > node->data.codigoDron)
+        {
+            return findRecursive(node->right, codigoDron);
+        }
+
+        return &node->data;
+    }
+
+    /**
+     * @brief Recorre el árbol in-order y acumula los códigos.
+     *
+     * Aunque el AVL rota nodos, sigue respetando la propiedad BST.
+     * Por eso, in-order devuelve claves ordenadas.
+     *
+     * @param node Nodo actual.
+     * @param result Vector donde se guardan los códigos.
+     */
+    void inOrderCodesRecursive(const Node* node, std::vector<int>& result) const
+    {
+        if (node == nullptr)
+        {
+            return;
+        }
+
+        inOrderCodesRecursive(node->left, result);
+        result.push_back(node->data.codigoDron);
+        inOrderCodesRecursive(node->right, result);
+    }
+
+    /**
+     * @brief Verifica recursivamente si el subárbol cumple la propiedad AVL.
+     *
+     * @param node Nodo actual.
+     *
+     * @return true si todos los factores de balance están entre -1 y 1.
+     */
+    bool isBalancedRecursive(const Node* node) const noexcept
+    {
+        if (node == nullptr)
+        {
+            return true;
+        }
+
+        const int balance = balanceFactor(node);
+
+        if (balance < -1 || balance > 1)
+        {
+            return false;
+        }
+
+        return isBalancedRecursive(node->left) && isBalancedRecursive(node->right);
+    }
+
+public:
+    /**
+     * @brief Construye un AVL vacío.
+     */
+    AvlDronesMedicos()
+        : m_root(nullptr)
+        , m_size(0)
+    {
+    }
+
+    /**
+     * @brief Destruye el árbol y libera todos los nodos.
+     */
+    ~AvlDronesMedicos()
+    {
+        destroyRecursive(m_root);
+        m_root = nullptr;
+        m_size = 0;
+    }
+
+    /**
+     * @brief Deshabilita copia para evitar shallow copy de raw pointers.
+     */
+    AvlDronesMedicos(const AvlDronesMedicos&) = delete;
+
+    /**
+     * @brief Deshabilita asignación por copia para evitar doble delete.
+     */
+    AvlDronesMedicos& operator=(const AvlDronesMedicos&) = delete;
+
+    /**
+     * @brief Inserta o actualiza un dron médico.
+     *
+     * @param value Dron a insertar o actualizar.
+     */
+    void insert(const DronMedico& value)
+    {
+        m_root = insertRecursive(m_root, value);
+    }
+
+    /**
+     * @brief Indica si existe un dron con el código indicado.
+     *
+     * @param codigoDron Código buscado.
+     *
+     * @return true si existe, false en caso contrario.
+     */
+    bool contains(int codigoDron) const
+    {
+        return find(codigoDron) != nullptr;
+    }
+
+    /**
+     * @brief Busca un dron por código.
+     *
+     * @param codigoDron Código buscado.
+     *
+     * @return Puntero constante al dron encontrado, o nullptr si no existe.
+     */
+    const DronMedico* find(int codigoDron) const
+    {
+        return findRecursive(m_root, codigoDron);
+    }
+
+    /**
+     * @brief Devuelve la altura actual del árbol.
+     *
+     * @return Altura del AVL.
+     */
+    int height() const noexcept
+    {
+        return nodeHeight(m_root);
+    }
+
+    /**
+     * @brief Devuelve la cantidad de drones únicos almacenados.
+     *
+     * @return Cantidad de nodos.
+     */
+    std::size_t size() const noexcept
+    {
+        return m_size;
+    }
+
+    /**
+     * @brief Indica si el árbol está vacío.
+     *
+     * @return true si no contiene nodos.
+     */
+    bool isEmpty() const noexcept
+    {
+        return m_size == 0;
+    }
+
+    /**
+     * @brief Devuelve los códigos ordenados de menor a mayor.
+     *
+     * @return Vector con los códigos ordenados.
+     */
+    std::vector<int> inOrderCodes() const
+    {
+        std::vector<int> result;
+        inOrderCodesRecursive(m_root, result);
+        return result;
+    }
+
+    /**
+     * @brief Verifica si todo el árbol cumple la propiedad AVL.
+     *
+     * @return true si todos los nodos tienen factor de balance válido.
+     */
+    bool isBalanced() const noexcept
+    {
+        return isBalancedRecursive(m_root);
+    }
+
+    /**
+     * @brief Devuelve el código almacenado en la raíz.
+     *
+     * Método pensado para tests de rotaciones.
+     *
+     * @return Código de la raíz, o -1 si el árbol está vacío.
+     */
+    int rootCodeForTesting() const noexcept
+    {
+        if (m_root == nullptr)
+        {
+            return -1;
+        }
+
+        return m_root->data.codigoDron;
+    }
+};
+
+#endif
+

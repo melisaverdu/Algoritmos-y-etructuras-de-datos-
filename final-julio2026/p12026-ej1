@@ -1,0 +1,180 @@
+/* 
+P1 — Queue: verificación de palíndromo
+
+Contexto:
+El sistema de monitoreo de señales neuronales de CyberCórdoba registra secuencias de eventos en una cola (Queue). El equipo de Exodus
+Systems necesita detectar si una secuencia de eventos es un palíndromo, propiedad que indica una anomalía simétrica en la señal.
+
+Tarea:
+Implementar el método bool esPalindromo() dentro de la clase Queue<TData>. El método debe retornar true si los elementos de la cola
+forman un palíndromo, false en caso contrario.
+
+Restricciones:
+• No usar loops sobre punteros internos. Solo usar las operaciones públicas del ADT: enqueue, dequeue, front, isEmpty, size.
+• Se permite usar un Stack<TData> auxiliar.
+• La cola debe quedar con el mismo contenido y orden que al inicio.
+• No usar arrays, vectores ni estructuras de la STL.
+
+Ejemplos:
+Queue: [1, 2, 3, 2, 1] -> true
+Queue: [A, B, C] -> false
+Queue: [X] -> true
+Queue: [] -> true
+
+Completar donde dice IMPLEMENTAR.
+
+Por ejemplo:
+Prueba Resultado
+Queue<int> q;
+for (int v : {1,2,3,2,1}) q.enqueue(v);
+std::cout << (q.esPalindromo() ? "true" : "false") << "\n";
+printQueue(q);
+
+true
+1 2 3 2 1
+
+Queue<int> q;
+for (int v : {1,2,3}) q.enqueue(v);
+std::cout << (q.esPalindromo() ? "true" : "false") << "\n";
+printQueue(q);
+
+false
+1 2 3
+*/
+
+#include <iostream>
+#include <stdexcept>
+
+// ---------------------------------------------------------------
+// Stack<TData>— ADT auxiliar disponible para usar en este parcial
+// ---------------------------------------------------------------
+template <typename TData>
+class Stack {
+private:
+    struct Node {
+        TData   data;
+        Node*   next;
+        explicit Node(const TData& d) : data(d), next(nullptr) {}
+    };
+    Node*       m_top;
+    std::size_t m_size;
+
+public:
+    Stack()  : m_top(nullptr), m_size(0) {}
+    ~Stack() { while (!isEmpty()) pop(); }
+
+    void push(const TData& value) {
+        Node* n  = new Node(value);
+        n->next  = m_top;
+        m_top    = n;
+        ++m_size;
+    }
+
+    void pop() {
+        if (isEmpty()) throw std::underflow_error("Stack::pop — stack vacio");
+        Node* tmp = m_top;
+        m_top     = m_top->next;
+        delete tmp;
+        --m_size;
+    }
+
+    const TData& top() const {
+        if (isEmpty()) throw std::underflow_error("Stack::top — stack vacio");
+        return m_top->data;
+    }
+
+    bool        isEmpty() const { return m_top == nullptr; }
+    std::size_t size()    const { return m_size; }
+};
+
+// ---------------------------------------------------------------
+// Queue<TData>
+// ---------------------------------------------------------------
+template <typename TData>
+class Queue {
+private:
+    struct Node {
+        TData   data;
+        Node*   next;
+        explicit Node(const TData& d) : data(d), next(nullptr) {}
+    };
+    Node*       m_front;
+    Node*       m_back;
+    std::size_t m_size;
+
+public:
+    Queue() : m_front(nullptr), m_back(nullptr), m_size(0) {}
+
+    ~Queue() { while (!isEmpty()) dequeue(); }
+
+    void enqueue(const TData& value) {
+        Node* n = new Node(value);
+        if (m_back) m_back->next = n;
+        else        m_front      = n;
+        m_back = n;
+        ++m_size;
+    }
+
+    void dequeue() {
+        if (isEmpty()) throw std::underflow_error("Queue::dequeue — queue vacia");
+        Node* tmp = m_front;
+        m_front   = m_front->next;
+        if (!m_front) m_back = nullptr;
+        delete tmp;
+        --m_size;
+    }
+
+    const TData& front() const {
+        if (isEmpty()) throw std::underflow_error("Queue::front — queue vacia");
+        return m_front->data;
+    }
+
+    bool        isEmpty() const { return m_front == nullptr; }
+    std::size_t size()    const { return m_size; }
+
+    // IMPLEMENTAR
+    bool esPalindromo() {
+        Stack<TData> aux;
+        bool esPal = true;
+        //supongamos que en la cola tengo [1,2,3]
+       
+        if(this->isEmpty()){ //condicion de si esta vacia tiene que ser true 
+            return esPal;
+        }
+
+        for(int i=0; i<=this->size(); i++){ //el tamaño es 3
+            TData temp = this->front(); //saco el 1 y lo guardo en un temp
+            this->dequeue(); //desencolo
+            aux.push(temp); //lo meto en el stack [3,2,1]
+            this->enqueue();//encolo
+            i++; //hago lo mismo con 2 y 3 
+        }
+
+        for(int i=0; i<=this->size(); i++){
+            if(this->front() != aux.top()){ //1 != 3
+                esPal = false;
+            }
+            i++;
+        }
+        
+        return esPal;
+
+
+    }
+};
+
+// ---------------------------------------------------------------
+// Helpers de test — no modificar
+// ---------------------------------------------------------------
+template <typename TData>
+void printQueue(Queue<TData>& q) {
+    std::size_t n = q.size();
+    for (std::size_t i = 0; i < n; ++i) {
+        TData val = q.front();
+        std::cout << val;
+        if (i + 1 < n) std::cout << " ";
+        q.dequeue();
+        q.enqueue(val);
+    }
+    std::cout << "\n";
+}
