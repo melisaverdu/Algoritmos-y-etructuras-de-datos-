@@ -1,207 +1,207 @@
+/**
+ * ============================================================================
+ * SIMULACIÓN PARCIAL 1 - ALGORITMOS Y ESTRUCTURAS DE DATOS
+ * FCEFyN - UNC
+ * ============================================================================
+ * Instrucciones: Resolvé los problemas de programación completando el código
+ * donde corresponda y pensá las respuestas de opción múltiple al final.
+ */
+
 #include <iostream>
-#include <initializer_list>
+#include <string>
+
+using namespace std;
+
+// ============================================================================
+// PUNTO 1: POLIMORFISMO Y CLASES DERIVADAS (Vale 30 puntos)
+// ============================================================================
+/*
+  ENUNCIADO:
+  En un sistema de monitoreo de pacientes en un sanatorio, los sensores envían 
+  datos de diferentes tipos: temperatura, presión y pulso. Se requiere un sistema 
+  que almacene distintos tipos de sensores como objetos polimórficos.
+  
+  Implementá una jerarquía de clases donde 'Sensor' es una clase base con una 
+  función virtual pura 'leer()'. Derivá al menos dos clases ('SensorTemperatura' 
+  y 'SensorPresion') que sobreescriban este método retornando "Presion" para el 
+  caso del SensorPresion y "Temperatura" para el SensorTemperatura.
+*/
+
+class Sensor {
+public:
+    // NOTA: 'leer' debe retornar una referencia constante a string y ser virtual pura.
+    virtual const string& leer() const = 0;
+    
+    // Destructor virtual por defecto (buena práctica obligatoria en polimorfismo)
+    virtual ~Sensor() = default;
+};
+
+// --- TU TAREA (PUNTO 1) ---
+// Implementá acá abajo las clases 'SensorPresion' y 'SensorTemperatura'
+// Recordá almacenar el string correspondiente y usar 'override'.
+
+// class SensorPresion ...
+// class SensorTemperatura ...
+
+// 1. Clase SensorPresion que hereda de Sensor
+class SensorPresion : public Sensor {
+private:
+    string dato; // Variable para guardar el texto
+
+public:
+    // Constructor: apenas nace el objeto, le cargamos "Presion"
+    SensorPresion() : dato("Presion") {}
+
+    // Sobreescribimos el método obligatorio de la clase base
+    const string& leer() const override {
+        return dato;
+    }
+};
+
+// 2. Clase SensorTemperatura que hereda de Sensor
+class SensorTemperatura : public Sensor {
+private:
+    string dato; // Variable para guardar el texto
+
+public:
+    // Constructor: apenas nace el objeto, le cargamos "Temperatura"
+    SensorTemperatura() : dato("Temperatura") {}
+
+    // Sobreescribimos el método obligatorio de la clase base
+    const string& leer() const override {
+        return dato;
+    }
+};
+
+
+// ============================================================================
+// PUNTO 2: IMPLEMENTACIÓN DE COLA (FIFO) (Vale 30 puntos)
+// ============================================================================
+/*
+  ENUNCIADO:
+  Dada la siguiente implementación base para una Cola, implementá la función 
+  'encolar' para agregar un elemento en base al patrón de acceso FIFO (First In, First Out).
+*/
 
 struct Nodo {
-    int valor;
-    Nodo* next;
-
-    explicit Nodo(int v) : valor(v), next(nullptr) {}
+    int dato;
+    Nodo* siguiente;
+    Nodo(int a) : dato(a), siguiente(nullptr) {}
 };
 
-// Helpers para tests (NO modificar)
-Nodo* buildList(std::initializer_list<int> vals) {
-    Nodo* head = nullptr;
-    Nodo* tail = nullptr;
+class Cola {
+private:
+    Nodo* inicio;
+    Nodo* final;
 
-    for (int v : vals) {
-        Nodo* n = new Nodo(v);
-
-        if (!head) {
-            head = tail = n;
-        } else {
-            tail->next = n;
-            tail = n;
+public:
+    Cola() : inicio(nullptr), final(nullptr) {}
+    
+    ~Cola() {
+        Nodo* temp = inicio;
+        while (temp != nullptr) {
+            Nodo* aux = temp;
+            temp = temp->siguiente;
+            delete aux;
         }
     }
 
-    return head;
-}
-
-void printList(Nodo* head) {
-    while (head) {
-        std::cout << head->valor;
-
-        if (head->next) {
-            std::cout << " -> ";
+    void imprimir() {
+        Nodo* temp = inicio;
+        cout << "Cola -> ";
+        while (temp != nullptr) {
+            cout << temp->dato << " -> ";
+            temp = temp->siguiente;
         }
-
-        head = head->next;
+        cout << "FINAL\n";
     }
 
-    std::cout << "\n";
-}
-
-void freeList(Nodo* head) {
-    while (head) {
-        Nodo* temp = head;
-        head = head->next;
-        delete temp;
-    }
-}
-
-/*
-============================================================
-PREGUNTA 1 — removeNegatives
-============================================================
-
-Implementar:
-
-Nodo* removeNegatives(Nodo* head);
-
-Restricciones:
-- Debe ser estrictamente recursiva
-- NO usar loops
-- Debe modificar la lista original
-- Debe liberar nodos eliminados
-
-Ejemplo:
-3 -> -1 -> 5 -> -2 -> 7
-↓
-3 -> 5 -> 7
-*/
-
-// DESARROLLE SU FUNCION AQUI
-Nodo* removeNegatives(Nodo* head){
-    if(head == nullptr) return nullptr;
-
-    if(head->valor < 0){
-        Nodo* temp = head;
-        head = head->next;
-        delete temp;
-        return removeNegatives(head);
-    } else {
-        head->next = removeNegatives(head->next);
-        return head;
-    }
-
-}
-
-/*
-============================================================
-PREGUNTA 2 — Debugging
-============================================================
-
-La siguiente función está rota:
-
-int countNodes(Nodo* head){
-    if(head == nullptr) return 0;
-
-    delete head;
-    return 1 + countNodes(head->next); //quiero acceder a memoria liberada, memory leak
-}
-
-Tu tarea:
-1. Identificar bug en comentario
-2. Corregir la función
-3. Justificar corrección
-
-*/
-
-// DESARROLLE SU FUNCION AQUI
-
-
-/*
-
-int countNodes(Nodo* head){
-    if(head == nullptr) return 0;
-
-    return 1 + countNodes(head->next);
-}
-    */
-int countNodes(Nodo* head){
-    if(head == nullptr) return 0;
-
-    return 1 + countNodes(head->next);
-}
-/*
-============================================================
-PREGUNTA 3 — esAlternante
-============================================================
-
-Una lista es alternante si:
-
-1 -> 3 -> 2 -> 4 -> 1   => true
-1 -> 2 -> 3             => false
-
-Implementar:
-
-bool esAlternante(Nodo* head);
-
-Restricciones:
-- Debe ser recursiva
-- NO loops
-*/
-
-// DESARROLLE SU FUNCION AQUI
-bool esAlternante(Nodo* head){
-    if(head != nullptr && head->next != nullptr && head->next->next != nullptr){
-        if((head->valor < head->next->valor)&&(head->next->next->valor < head->next->valor)){
-            return esAlternante(head->next);
-        } else if((head->valor > head->next->valor)&&(head->next->next->valor > head->next->valor)){
-            return esAlternante(head->next);
-        } else {
-            return false;   
+    // --- TU TAREA (PUNTO 2) ---
+    // Implementá el método encolar respetando el comportamiento FIFO
+    void encolar(int valor) {
+        // Tu código acá...
+        Nodo* temp = new Nodo(valor);
+        if(inicio ==  nullptr){
+            inicio = temp;
+            final = temp;
+        }else{
+            final->siguiente = temp;
+            final = temp;
         }
-}
-}
-
-/*
-============================================================
-PREGUNTA 4 — Invariantes
-============================================================
-
-Nombrar en comentarios 2 invariantes estructurales válidos
-para una cola implementada con:
-
-Node* front;
-Node* rear;
-
-invariantes estructurales:
-1. Si front es nullptr, entonces rear también debe ser nullptr (cola vacía).
-2. El nodo apuntado por rear siempre debe tener su puntero next igual a nullptr (indica el final de la cola).
-
-*/
-
-// ESCRIBA SUS INVARIANTES AQUI
+    }
+};
 
 
 
+
+// ============================================================================
+// FUNCIÓN MAIN (Para probar tus soluciones en VS Code)
+// ============================================================================
 int main() {
-    // =========================
-    // TEST removeNegatives
-    // =========================
-    Nodo* l1 = buildList({3, -1, 5, -2, 7});
-    l1 = removeNegatives(l1);
-    printList(l1);
-    freeList(l1);
+    cout << "--- probando punto 1 (polimorfismo) ---\n";
+    /* Descomentá esto cuando implementes las clases del Punto 1:
+    Sensor* s1 = new SensorPresion();
+    Sensor* s2 = new SensorTemperatura();
+    cout << "Sensor 1 dice: " << s1->leer() << endl; // Debería decir Presion
+    cout << "Sensor 2 dice: " << s2->leer() << endl; // Debería decir Temperatura
+    delete s1;
+    delete s2;
+    */
 
-    // =========================
-    // TEST countNodes
-    // =========================
-    Nodo* l2 = buildList({1, 2, 3, 4});
-    std::cout << countNodes(l2) << "\n";
-    freeList(l2);
-
-    // =========================
-    // TEST esAlternante
-    // =========================
-    Nodo* l3 = buildList({1, 3, 2, 4, 1});
-    std::cout << (esAlternante(l3) ? "true" : "false") << "\n";
-    freeList(l3);
-
-    Nodo* l4 = buildList({1, 2, 3});
-    std::cout << (esAlternante(l4) ? "true" : "false") << "\n";
-    freeList(l4);
+    cout << "\n--- probando punto 2 (cola fifo) ---\n";
+    Cola miCola;
+    miCola.encolar(12);
+    miCola.encolar(99);
+    miCola.imprimir(); // Debería mostrar: Cola -> 12 -> 99 -> FINAL
 
     return 0;
-};
+}
+
+
+
+
+/* ============================================================================
+ * SECCIÓN TEÓRICA: PREGUNTAS DE OPCIÓN MÚLTIPLE
+ * ============================================================================
+ * Escribí al lado o abajo de cada pregunta cuál considerás que es la opción correcta.
+ 
+ PREGUNTA 3:
+ ¿Cuál de las siguientes situaciones es un ejemplo natural donde una Pila (Stack) 
+ sería la estructura de datos más adecuada? [cite: 158]
+ 
+ a. Administrar tareas en un sistema operativo, donde las tareas se procesan en el orden en que llegan. [cite: 159]
+ b. Imprimir documentos en una impresora compartida. [cite: 160]
+ c. Implementar la función "deshacer" (undo) en un editor de texto o una aplicación de diseño. [cite: 161]
+ d. Procesar clientes en una fila de supermercado. [cite: 162]
+ 
+ RESPUESTA: c
+
+
+ PREGUNTA 4:
+ Durante una tormenta solar, la nave CONAE-Marte pierde contacto temporal con Tierra. [cite: 166]
+ Cuando la conexión se restablece, los comandos recibidos se almacenan en una cola para su ejecución en orden. [cite: 167]
+ Se reciben los siguientes comandos, en este orden:
+   1. "Reiniciar antena" [cite: 169]
+   2. "Verificar señal" [cite: 170]
+   3. "Reestablecer frecuencia" [cite: 171]
+ ¿Qué comando se ejecuta primero si se respeta el comportamiento de la estructura usada? [cite: 172]
+ 
+ a. "Verificar señal" [cite: 173]
+ b. "Reestablecer frecuencia" [cite: 174]
+ c. "Reiniciar antena" [cite: 175]
+ d. No se puede saber, depende de la prioridad de cada comando [cite: 176]
+ 
+ RESPUESTA: 1
+
+
+ PREGUNTA 5:
+ ¿Cuál estructura sería más adecuada para almacenar los paquetes en un robot repartidor 
+ que sigue una ruta definida, y debe entregarlos en el orden en que fueron cargados? [cite: 184]
+ 
+ a. Stack [cite: 185]
+ b. Queue [cite: 186]
+ c. Reverse List [cite: 187]
+ d. List [cite: 188]
+ 
+ RESPUESTA: Queue
+*/
