@@ -1,0 +1,426 @@
+#include <iostream>
+#include <stdexcept>
+#include <string>
+
+// ============================================================================
+// ============================================================================
+// PUNTO 1: QUEUE - VERIFICACIÓN DE PALÍNDROMO (Vale 25 puntos)
+// ============================================================================
+// ============================================================================
+/*
+  CONTEXTO:
+  El sistema de monitoreo de señales neuronales registra secuencias de eventos 
+  en una cola (Queue). Se necesita detectar si una secuencia de eventos es un 
+  palíndromo, propiedad que indica una anomalía simétrica en la señal.
+
+  TAREA:
+  Implementar el método bool esPalindromo() dentro de la clase Queue<TData>.
+  El método debe retornar true si los elementos forman un palíndromo, false en caso contrario.
+
+  RESTRICCIONES:
+  - NO usar loops sobre punteros internos.
+  - Solo usar las operaciones públicas del ADT: enqueue, dequeue, front, isEmpty, size.
+  - Se permite usar un Stack<TData> auxiliar.
+  - La cola debe quedar con el mismo contenido y orden que al inicio.
+  - No usar arrays, vectores ni estructuras de la STL.
+*/
+
+template <typename TData>
+class StackP1 { // Stack auxiliar para el Punto 1
+private:
+    struct Node {
+        TData data;
+        Node* next;
+        explicit Node(const TData& d) : data(d), next(nullptr) {}
+    };
+    Node* m_top;
+    std::size_t m_size;
+
+public:
+    StackP1() : m_top(nullptr), m_size(0) {}
+    ~StackP1() { while (!isEmpty()) pop(); }
+
+    void push(const TData& value) {
+        Node* n = new Node(value);
+        n->next = m_top;
+        m_top = n;
+        ++m_size;
+    }
+
+    void pop() {
+        if (isEmpty()) throw std::underflow_error("Stack vacio");
+        Node* tmp = m_top;
+        m_top = m_top->next;
+        delete tmp;
+        --m_size;
+    }
+
+    const TData& top() const {
+        if (isEmpty()) throw std::underflow_error("Stack vacio");
+        return m_top->data;
+    }
+
+    bool isEmpty() const { return m_top == nullptr; }
+    std::size_t size() const { return m_size; }
+};
+
+template <typename TData>
+class Queue {
+private:
+    struct Node {
+        TData data;
+        Node* next;
+        explicit Node(const TData& d) : data(d), next(nullptr) {}
+    };
+    Node* m_front;
+    Node* m_back;
+    std::size_t m_size;
+
+public:
+    Queue() : m_front(nullptr), m_back(nullptr), m_size(0) {}
+    ~Queue() { while (!isEmpty()) dequeue(); }
+
+    void enqueue(const TData& value) {
+        Node* n = new Node(value);
+        if (m_back) m_back->next = n;
+        else m_front = n;
+        m_back = n;
+        ++m_size;
+    }
+
+    void dequeue() {
+        if (isEmpty()) throw std::underflow_error("Queue vacia");
+        Node* tmp = m_front;
+        m_front = m_front->next;
+        if (!m_front) m_back = nullptr;
+        delete tmp;
+        --m_size;
+    }
+
+    const TData& front() const {
+        if (isEmpty()) throw std::underflow_error("Queue vacia");
+        return m_front->data;
+    }
+
+    bool isEmpty() const { return m_front == nullptr; }
+    std::size_t size() const { return m_size; }
+
+    // ------------------------------------------------------------------------
+    // IMPLEMENTAR PUNTO 1
+    // ------------------------------------------------------------------------
+    bool esPalindromo() {
+        // --- TU TAREA ---
+        // Tu código acá...
+
+        if(size() <= 1){
+            return true;
+        }
+
+        StackP1<TData> aux;
+        bool esPalindromo = true;
+        std::size_t tam = size();
+
+        for(std::size_t i = 0; i<tam; i++){
+            aux.push(front());      //pongo el primer elemento de la cola al fonde de la pila
+            enqueue(front());       //encolo el frente
+            dequeue();              //desencolo porque no quiero repetidos
+        }
+
+        while(!aux.isEmpty()){      //mientras tenga elementos en la pila
+            if(front() != aux.top()){       //cuando pase no es palindromo
+                esPalindromo = false;
+            }
+            aux.pop ();      //elimino de la pila
+            enqueue(front()); //encolo el frente
+            dequeue();      //desencolo para ue no repita 
+        }
+        return esPalindromo; 
+    }
+};
+
+
+// ============================================================================
+// ============================================================================
+// PUNTO 2: STACK - INVERSIÓN DE PILA (Vale 25 puntos)
+// ============================================================================
+// ============================================================================
+/*
+  CONTEXTO:
+  El pipeline de procesamiento de comandos de drones apila instrucciones en orden 
+  de llegada. Ante una señal de reversión, el sistema debe invertir el orden del 
+  stack de comandos pendientes antes de ejecutarlos.
+
+  TAREA:
+  Implementar el método Stack<TData> invertir() const dentro de la clase Stack<TData>.
+  El método debe retornar un NUEVO stack con los elementos en orden inverso al original.
+  El stack original NO debe modificarse.
+
+  RESTRICCIONES:
+  - Solo usar las operaciones públicas del ADT: push, pop, top, isEmpty, size.
+  - Se permite usar un segundo Stack<TData> auxiliar.
+  - No usar arrays, vectores ni estructuras de la STL.
+*/
+
+template <typename TData>
+class Stack {
+private:
+    struct Node {
+        TData data;
+        Node* next;
+        explicit Node(const TData& d) : data(d), next(nullptr) {}
+    };
+    Node* m_top;
+    std::size_t m_size;
+
+public:
+    Stack() : m_top(nullptr), m_size(0) {}
+    ~Stack() { while (!isEmpty()) pop(); }
+
+    void push(const TData& value) {
+        Node* n = new Node(value);
+        n->next = m_top;
+        m_top = n;
+        ++m_size;
+    }
+
+    void pop() {
+        if (isEmpty()) throw std::underflow_error("Stack: pop stack vacio");
+        Node* tmp = m_top;
+        m_top = m_top->next;
+        delete tmp;
+        --m_size;
+    }
+
+    const TData& top() const {
+        if (isEmpty()) throw std::underflow_error("Stack: top stack vacio");
+        return m_top->data;
+    }
+
+    bool isEmpty() const { return m_top == nullptr; }
+    std::size_t size() const { return m_size; }
+
+    // ------------------------------------------------------------------------
+    // IMPLEMENTAR PUNTO 2
+    // ------------------------------------------------------------------------
+    Stack<TData> invertir() const {
+        // --- TU TAREA ---
+        // Tu código acá...
+        // Nota: Recordá que este método es 'const', por lo tanto NO podés 
+        // modificar el stack que lo llama (this). Deberás desapilar una copia
+        // o utilizar auxiliares de manera segura sin destruir la pila actual.
+
+        if(size()<=1){
+            return this;
+        }
+        
+        Stack<TData> copia = *this;
+        Stack<TData> resultado;
+        std::size_t tam = size(); //tamaño de la pila original 
+
+        for(std::size_t i = 0; i<tam; i++){
+            resultado.push(copia.top());
+            copia.pop();
+        }
+
+        return resultado;
+
+    }
+};
+
+
+// ============================================================================
+// ============================================================================
+// PUNTO 3: LISTA DOBLEMENTE ENLAZADA - ELIMINACIÓN DE DUPLICADOS (Vale 25 puntos)
+// ============================================================================
+// ============================================================================
+/*
+  CONTEXTO:
+  Los logs de actividad neuronal se almacenan en una lista doblemente enlazada. 
+  Los registros duplicados consecutivos representan redundancia y deben ser 
+  eliminados para reducir el costo de transmisión.
+
+  TAREA:
+  Implementar el método void eliminarDuplicados() dentro de la clase DLL<TData>.
+  El método debe eliminar todos los nodos cuyo valor sea igual al del nodo 
+  inmediatamente anterior. La lista debe modificarse in-place y la 
+  memoria de los nodos eliminados debe liberarse correctamente.
+
+  RESTRICCIONES:
+  - NO usar estructuras auxiliares (arrays, vectores, stacks, queues).
+  - Mantener correctos los punteros prev y next de todos los nodos sobrevivientes, 
+    incluyendo m_head y m_tail.
+  - Actualizar m_size correctamente.
+*/
+
+template <typename TData>
+class DLL {
+private:
+    struct Node {
+        TData data;
+        Node* next;
+        Node* prev;
+        explicit Node(const TData& d) : data(d), next(nullptr), prev(nullptr) {}
+    };
+    Node* m_head;
+    Node* m_tail;
+    std::size_t m_size;
+
+public:
+    DLL() : m_head(nullptr), m_tail(nullptr), m_size(0) {}
+    ~DLL() {
+        while (m_head) {
+            Node* tmp = m_head;
+            m_head = m_head->next;
+            delete tmp;
+        }
+    }
+
+    void pushBack(const TData& value) {
+        Node* n = new Node(value);
+        if (!m_head) {
+            m_head = n;
+            m_tail = n;
+        } else {
+            m_tail->next = n;
+            n->prev = m_tail;
+            m_tail = n;
+        }
+        ++m_size;
+    }
+
+    std::size_t size() const { return m_size; }
+
+    void print() const {
+        Node* curr = m_head;
+        while (curr) {
+            std::cout << curr->data;
+            if (curr->next) std::cout << " ";
+            curr = curr->next;
+        }
+        std::cout << "\n";
+    }
+
+    // ------------------------------------------------------------------------
+    // IMPLEMENTAR PUNTO 3
+    // ------------------------------------------------------------------------
+    void eliminarDuplicados() {
+        // --- TU TAREA ---
+        // Tu código acá...
+        // Recordá actualizar m_size y liberar la memoria con 'delete'
+        // cuando desconectes un nodo duplicado de la lista.
+
+        if(size()<=1){
+            return;
+        }
+        
+        Node* aux = m_head;
+
+
+        while(aux != nullptr && aux->next != nullptr){
+
+            if(aux->next == nullptr && aux->data == aux->prev->data){
+                Node*temp = aux;
+                aux->prev->next = nullptr;
+                m_tail = m_head;
+                delete temp;
+
+            }else if(aux->data == aux->next->data && aux->next != m_tail){
+                Node* temp = aux->next;
+                aux->next = aux->next->next;
+                aux->next->prev = aux;
+                delete temp;
+            }
+
+            aux = aux->next;
+
+        }
+
+        
+    }
+};
+
+
+// ============================================================================
+// ============================================================================
+// MAIN DE PRUEBAS AUTOMÁTICAS (Idéntico al corrector del Aula Virtual)
+// ============================================================================
+// ============================================================================
+template <typename TData>
+void printQueueHelper(Queue<TData>& q) {
+    std::size_t n = q.size();
+    for (std::size_t i = 0; i < n; ++i) {
+        TData val = q.front();
+        std::cout << val << (i + 1 < n ? " " : "");
+        q.dequeue();
+        q.enqueue(val);
+    }
+    std::cout << "\n";
+}
+
+template <typename TData>
+void printStackHelper(Stack<TData> s) { // Recibe por copia de forma segura para imprimir
+    Stack<TData> temp;
+    while (!s.isEmpty()) {
+        temp.push(s.top());
+        s.pop();
+    }
+    while (!temp.isEmpty()) {
+        std::cout << temp.top() << (temp.size() > 1 ? " " : "");
+        temp.pop();
+    }
+    std::cout << "\n";
+}
+
+int main() {
+    std::cout << "==================================================\n";
+    std::cout << "  INICIANDO TESTING DEL PRIMER PARCIAL S1-2026\n";[cite: 1]
+    std::cout << "==================================================\n\n";
+
+    // ------------------------------------------------------------------------
+    // TEST CORRIDA PUNTO 1
+    // ------------------------------------------------------------------------
+    std::cout << "[PUNTO 1: Queue - esPalindromo()]\n";
+    
+    Queue<int> q1;
+    for (int v : {1, 2, 3, 2, 1}) q1.enqueue(v);
+    std::cout << "Prueba 1 (Palindromo Impar): " << (q1.esPalindromo() ? "PASO (true)" : "FALLO (false)") << "\n";
+    std::cout << "Cola original restaurada: "; printQueueHelper(q1);
+
+    Queue<int> q2;
+    for (int v : {1, 2, 3}) q2.enqueue(v);
+    std::cout << "Prueba 2 (No Palindromo): " << (!q2.esPalindromo() ? "PASO (false)" : "FALLO (true)") << "\n";
+    std::cout << "Cola original restaurada: "; printQueueHelper(q2);
+    
+    std::cout << "--------------------------------------------------\n\n";
+
+    // ------------------------------------------------------------------------
+    // TEST CORRIDA PUNTO 2
+    // ------------------------------------------------------------------------
+    std::cout << "[PUNTO 2: Stack - invertir()]\n";
+    
+    Stack<int> s1;
+    for (int v : {1, 2, 3, 4, 5}) s1.push(v); // 5 queda en el tope
+    Stack<int> inv = s1.invertir();
+    
+    std::cout << "Original:  "; printStackHelper(s1);
+    std::cout << "Invertido: "; printStackHelper(inv);
+    std::cout << "--------------------------------------------------\n\n";
+
+    // ------------------------------------------------------------------------
+    // TEST CORRIDA PUNTO 3
+    // ------------------------------------------------------------------------
+    std::cout << "[PUNTO 3: DLL - eliminarDuplicados()]\n";
+    
+    DLL<int> l1;
+    for (int v : {1, 1, 2, 3, 3, 3, 4}) l1.pushBack(v);
+    std::cout << "Original: "; l1.print();
+    l1.eliminarDuplicados();
+    std::cout << "Despues:  "; l1.print(); // Esperado: 1 2 3 4
+    std::cout << "Tamano:   " << l1.size() << " (Esperado: 4)\n";
+
+    std::cout << "\n==================================================\n";
+    std::cout << "                 TESTING FINALIZADO\n";
+    std::cout << "==================================================\n";
+
+    return 0;
+}
