@@ -1,0 +1,297 @@
+#include <iostream>
+#include <string>
+#include <algorithm>
+#include <climits>
+#include <cmath>
+#include <queue>
+#include <vector>
+#include <list>
+#include <stdexcept>
+
+using namespace std;
+
+// =============================================================================
+// PREGUNTA 1: ARBOL BINARIO - MAX-HEAP (Puntúa 40 sobre 40)
+// =============================================================================
+/*
+Implementar el método bool ArbolBinario::esMaxHeap() de la clase ArbolBinario. 
+Este método debe determinar si el árbol binario almacenado es un Max-Heap.
+
+Max-Heap (Propiedad del Montículo): Para todo nodo, su valor es mayor o igual 
+que el valor de sus hijos (si existen).
+Un árbol con raíz nullptr se considera un Max-Heap.
+*/
+
+struct NodoArbol {
+    int valor;
+    NodoArbol* izquierda;
+    NodoArbol* derecha;
+    NodoArbol(int v) : valor(v), izquierda(nullptr), derecha(nullptr) {}
+};
+
+class ArbolBinario {
+private:
+    NodoArbol* raiz;
+
+    void destruir(NodoArbol* nodo) {
+        if (nodo != nullptr) {
+            destruir(nodo->izquierda);
+            destruir(nodo->derecha);
+            delete nodo;
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // A IMPLEMENTAR: Método recursivo auxiliar
+    // -------------------------------------------------------------------------
+    bool esMaxHeapRec(NodoArbol* nodo) {
+        // TU CÓDIGO AQUÍ:
+        if(nodo == nullptr){
+            return true;
+        }
+
+        bool izqok = true;
+        bool derok = true;
+
+        if(nodo->izquierda != nullptr){
+            if(nodo->valor >= nodo->izquierda->valor){ //tengo que verificar el izquierdo
+                izqok = esMaxHeapRec(nodo->izquierda);
+            }else{
+                izqok = false;
+            }
+        }
+
+        if(nodo->derecha != nullptr){
+            if(nodo->valor >= nodo->derecha->valor){ //tengo que verificar el izquierdo
+                derok = esMaxHeapRec(nodo->derecha);
+            }else{
+                derok = false;
+            }
+        }
+        return (izqok && derok);
+    }
+
+public:
+    ArbolBinario() : raiz(nullptr) {}
+    
+    ~ArbolBinario() {
+        destruir(raiz);
+    }
+
+    void setRaiz(NodoArbol* nuevaRaiz) {
+        if (raiz != nullptr) {
+            destruir(raiz);
+        }
+        raiz = nuevaRaiz;
+    }
+
+    // -------------------------------------------------------------------------
+    // A IMPLEMENTAR: Método público
+    // -------------------------------------------------------------------------
+    bool esMaxHeap() {
+        // TU CÓDIGO AQUÍ:
+        return esMaxHeapRec(raiz);
+    }
+};
+
+
+// =============================================================================
+// PREGUNTA 2: GRAFOS - BIPARTITO CON DFS (Puntúa 30 sobre 30)
+// =============================================================================
+/*
+Implementar el método bool Grafo::esBipartito() de la clase Grafo. 
+Este método debe determinar si el grafo no dirigido almacenado es bipartito.
+
+Grafo Bipartito: Un grafo es bipartito si es posible "colorear" cada uno de sus 
+vértices con uno de dos colores (por ejemplo, Color 0 y Color 1) de tal manera 
+que ninguna arista conecte dos vértices del mismo color.
+
+Deberás utilizar un método auxiliar recursivo basado en Recorrido en Profundidad (DFS):
+bool esBipartitoRec(int u, int colorActual, int colores[]);
+ - u: El vértice que se está visitando actualmente.
+ - colores: Arreglo para almacenar el color de cada vértice.
+            (-1 para "no coloreado", 0 para Color 0, 1 para Color 1).
+ - colorActual: El color (0 o 1) que se debe asignar al vértice u.
+
+Asigna el color actual a u, luego calcula el color esperado para los vecinos y 
+se llama recursivamente para las adyacencias que aún no fueron coloreadas.
+ - Devuelve false, si alguna llamada recursiva devuelve false.
+ - Devuelve false, si la adyacencia ya estaba coloreada y tiene el mismo color que u.
+ - Si no aplica ninguno de los casos anteriores para ninguna adyacencia devuelve true.
+
+El método principal esBipartito() deberá inicializar el arreglo colores (todo a -1) 
+y llamar a esBipartitoRec para cada vértice que no haya sido coloreado. 
+Devuelve false si alguna llamada a esBipartitoRec devuelve false.
+*/
+
+class Grafo {
+private:
+    int V;
+    std::list<int>* adj;
+
+    // -------------------------------------------------------------------------
+    // A IMPLEMENTAR: Auxiliar recursivo (DFS)
+    // -------------------------------------------------------------------------
+    bool esBipartitoRec(int u, int colorActual, int colores[]) {
+    // 1. Asigno el color actual al nodo donde estoy parado
+        colores[u] = colorActual; 
+
+    // 2. Calculo el color que deberían tener mis vecinos
+        int colorVecino = colorActual;
+        if(colorVecino == 1){
+            colorVecino = 0;
+        } else {
+            colorVecino = 1;
+        }
+
+    // 3. Recorremos los vecinos usando el for corto
+        for(int vecinos : adj[u]){
+            
+            // CASO A: El vecino no está coloreado
+            if(colores[vecinos] == -1){
+                // Llamamos recursivamente y SI DA FALSE, cortamos y subimos el false
+                if (esBipartitoRec(vecinos, colorVecino, colores) == false) {
+                    return false;
+                }
+            }
+            // CASO B: El vecino ya estaba coloreado. ¡Solo falla si tiene MI MISMO color!
+            else if (colores[vecinos] == colorActual) {
+                return false;
+            }
+    }
+
+    // 4. Si revisó todos los vecinos y ninguno rompió las reglas: este camino está OK
+    return true;
+}
+    
+
+public:
+    Grafo(int V) {
+        this->V = V;
+        this->adj = new std::list<int>[V];
+    }
+
+    ~Grafo() {
+        delete[] adj;
+    }
+
+    void agregarArista(int u, int v) {
+        if (u >= 0 && u < V && v >= 0 && v < V) {
+            adj[u].push_back(v);
+            adj[v].push_back(u);
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // A IMPLEMENTAR: Método principal
+    // -------------------------------------------------------------------------
+    bool esBipartito() {
+        // TU CÓDIGO AQUÍ:
+        int colores[V];
+        for(int i=0; i<V; i++){
+            colores[i]=-1;
+        }
+
+        for(int i=0; i<V; i++){
+            if(colores[i] == -1){
+                esBipartitoRec(i, 0, colores);
+            }
+        }
+        
+    }
+};
+
+
+// =============================================================================
+// FUNCIÓN MAIN CON TODOS LOS CASOS DE TEST DEL EXAMEN
+// =============================================================================
+int main() {
+    cout << "=== ENTORNO DE PRUEBAS - PARCIAL 2 ===" << endl << endl;
+
+    // -------------------------------------------------------------------------
+    // PRUEBAS DE LA PREGUNTA 1 (Max-Heap)
+    // -------------------------------------------------------------------------
+    cout << "--- Tests Pregunta 1 (Max-Heap) ---" << endl;
+    
+    ArbolBinario t1;
+    cout << "Test 1 (Vacio): " << t1.esMaxHeap() << " | Esperado: 1" << endl;
+
+    NodoArbol* r2 = new NodoArbol(100);
+    ArbolBinario t2;
+    t2.setRaiz(r2);
+    cout << "Test 2 (Solo raiz): " << t2.esMaxHeap() << " | Esperado: 1" << endl;
+
+    NodoArbol* r3 = new NodoArbol(100);
+    r3->izquierda = new NodoArbol(50);
+    r3->derecha = new NodoArbol(40);
+    ArbolBinario t3;
+    t3.setRaiz(r3);
+    cout << "Test 3 (Max-Heap): " << t3.esMaxHeap() << " | Esperado: 1" << endl;
+
+    NodoArbol* r4 = new NodoArbol(100);
+    r4->izquierda = new NodoArbol(50);
+    r4->derecha = new NodoArbol(40);
+    r4->izquierda->izquierda = new NodoArbol(20);
+    ArbolBinario t4;
+    t4.setRaiz(r4);
+    cout << "Test 4 (Max-Heap 2): " << t4.esMaxHeap() << " | Esperado: 1" << endl;
+
+    NodoArbol* r5 = new NodoArbol(100);
+    r5->izquierda = new NodoArbol(50);
+    r5->derecha = new NodoArbol(40);
+    r5->izquierda->izquierda = new NodoArbol(60); // Falla (50 < 60)
+    ArbolBinario t5;
+    t5.setRaiz(r5);
+    cout << "Test 5 (NO Max-Heap): " << t5.esMaxHeap() << " | Esperado: 0" << endl;
+
+    NodoArbol* r6 = new NodoArbol(100);
+    r6->izquierda = nullptr; // Hueco
+    r6->derecha = new NodoArbol(40);
+    ArbolBinario t6;
+    t6.setRaiz(r6);
+    cout << "Test 6 (SI Max-Heap): " << t6.esMaxHeap() << " | Esperado: 1" << endl << endl;
+
+
+    // -------------------------------------------------------------------------
+    // PRUEBAS DE LA PREGUNTA 2 (Grafo Bipartito)
+    // -------------------------------------------------------------------------
+    cout << "--- Tests Pregunta 2 (Grafo Bipartito) ---" << endl;
+
+    // Test G1: Grafo cíclico par (Bipartito) -> Cuadrado 0-1-2-3-0
+    Grafo g1(4);
+    g1.agregarArista(0, 1);
+    g1.agregarArista(1, 2);
+    g1.agregarArista(2, 3);
+    g1.agregarArista(3, 0);
+    cout << "Test Grafo 1 (Ciclo Par): " << g1.esBipartito() << " | Esperado: 1" << endl;
+
+    // Test G2: Grafo cíclico impar (NO Bipartito) -> Triángulo 0-1-2-0
+    Grafo g2(3);
+    g2.agregarArista(0, 1);
+    g2.agregarArista(1, 2);
+    g2.agregarArista(2, 0);
+    cout << "Test Grafo 2 (Ciclo Impar): " << g2.esBipartito() << " | Esperado: 0" << endl;
+
+    return 0;
+}
+
+/* =============================================================================
+   PREGUNTAS TEÓRICAS DEL PARCIAL (Para repasar)
+   =============================================================================
+   
+   Pregunta 3:
+   ¿Qué dos propiedades debe cumplir un árbol binario para ser considerado un 
+   Max-Heap (Montículo Binario de Máximos)?
+   Respuesta Correcta: Ser un árbol completo y cumplir la "propiedad del montículo" 
+   (cada nodo es mayor o igual que sus hijos).
+   
+   Pregunta 4:
+   ¿Qué estructura de datos es fundamental para implementar el algoritmo de 
+   Recorrido en amplitud (BFS)?
+   Respuesta Correcta: Una Cola (Queue).
+   
+   Pregunta 5:
+   ¿Cuál es la complejidad temporal (caso promedio) de buscar, insertar y 
+   eliminar en un Árbol AVL (un árbol binario de búsqueda auto-balanceado) con N nodos?
+   Respuesta Correcta: O(log N).
+*/

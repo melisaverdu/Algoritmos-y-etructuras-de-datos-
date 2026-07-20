@@ -1,0 +1,140 @@
+#include <iostream>
+#include <queue>
+#include <vector>
+#include <utility>
+
+using namespace std;
+
+#define INFI 9000
+
+/*
+==========================================================================================
+ENUNCIADO - PREGUNTA 2: SALTOS MÍNIMOS DEL CABALLO (BFS EN GRAFOS IMPLÍCITOS)
+==========================================================================================
+En el juego de ajedrez el caballo puede moverse en L (2 casillas en una dirección y 1 
+casilla en otra dirección transversal).
+Desarrollar la función saltosMinimosCaballo(N, inicio, fin), que permita determinar la 
+cantidad de movimientos mínimos del caballo para ir de una posición a otra del tablero.
+
+PARÁMETROS:
+- N: Número de casillas del tablero (Tablero de N x N).
+- inicio: par (x, y) de la posición de inicio.
+- fin: par (x, y) de la posición final.
+
+PISTAS PROVISTAS POR LA CÁTEDRA:
+- Se considera cada posición del tablero como un vértice de un grafo pero de forma implícita.
+- Utilizamos una matriz de visitados para controlar si el caballo ya pasó por una posición.
+- Realizamos un BFS hasta llegar al nodo destino, saltando solo a las posiciones válidas 
+  determinadas por los siguientes arrays de movimiento:
+    int dx[] = {-2, -1, 1, 2, 2, 1, -1, -2};
+    int dy[] = {-1, -2, -2, -1, 1, 2, 2, 1};
+==========================================================================================
+*/
+
+// ==========================================
+// A IMPLEMENTAR: Función del caballo por BFS
+// ==========================================
+int saltosMinimosCaballo(int N, pair<int, int> inicio, pair<int, int> fin) {
+    // Vectores de dirección para los 8 movimientos posibles en L del caballo
+    int dx[] = {-2, -1, 1, 2, 2, 1, -1, -2};
+    int dy[] = {-1, -2, -2, -1, 1, 2, 2, 1};
+
+    // TU CÓDIGO AQUÍ:
+    
+    //1-verifico origen y destino
+    
+    //2-declaro los arreglos que necesito
+    bool visitados[N][N];
+    int distancia[N][N];
+    queue<pair<int, int>> q;
+
+    //3-inicializo los arrelos
+    for(int i=0; i<N; i++){
+        for(int j=0; j<N; j++){
+            visitados[i][j]=false;
+            distancia[i][j]=INFI;
+        }
+    }
+
+    //4-me encargo del origen
+    distancia[inicio.first][inicio.second]=0;
+    q.push(inicio); 
+
+    //5-empiezo a revisar los elementos en la cola 
+    while(!q.empty()){
+        pair<int, int> actual = q.front(); //paso el primero en la cola
+        q.pop(); //lo saco
+
+        int x = actual.first;
+        int y = actual.second;
+
+        if(x == fin.first && y == fin.second){
+            return distancia[x][y];
+        }
+
+        for(int v=0; v<N; v++){
+             int nx = x + dx[v];
+             int ny = y + dy[v];
+
+            //me fijo que este apto para ser visitado el vecino 
+            if(nx >= 0 && ny >= 0 && nx < N && ny < N && !visitados[nx][ny]){
+                visitados[nx][ny]= true; //marco como visitado
+                q.push({nx,ny});
+                distancia[nx][ny]=distancia[x][y] + 1;
+            }
+        }
+    }
+    return -1;
+}
+
+int main() {
+    int N = 8;
+    pair<int, int> inicio = {0, 0};
+    pair<int, int> fin = {7, 7};
+    
+    int saltos = saltosMinimosCaballo(N, inicio, fin);
+    cout << "Saltos minimos esperados (6): " << saltos << endl;
+
+    pair<int, int> fin1 = {1, 2};
+    cout << "Saltos minimos esperados (1): " << saltosMinimosCaballo(N, inicio, fin1) << endl;
+
+    return 0;
+}
+
+/*
+//1.verifico origen y destino
+
+//2.declaro los arreglos que necesito 
+bool visitados[N];
+int distancia[N];
+queue<int> q;
+
+//3.inicializo los arreglos
+for(int i=0; i<N; i++){
+    visitados[i]=false;
+    distancia[i]=INF;
+}
+
+//4.me encargo del origen
+q.enqueue(origen);
+distancia[origen]=0;
+
+//5.empiezo a revisar la cola 
+while(!q.isEmpty()){
+    auto actual=q.front();
+    q.dequeue();
+
+    if(actual==destino){
+        return distancia[actual];
+    }
+
+    for(int v=0; v<N; v++){
+        if(!visitados[v] && visitados[actual][v] && alguna otra condicion como si esta habilitado){
+            visitados[v]=true;
+            q.enqueue();
+            distancia[v]=distancia[actual]+1;
+        }
+    }
+}
+return -1;
+*/

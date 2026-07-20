@@ -1,0 +1,103 @@
+#include <iostream>
+#include <vector>
+
+
+class Nodo {
+public:
+    int dato;
+    Nodo* izq;
+    Nodo* der;
+    explicit Nodo(const int x) : dato(x), izq(nullptr), der(nullptr) {}
+};
+
+class ABB {
+private:
+    Nodo* raiz = nullptr;
+
+    // Método auxiliar provisto por la cátedra para buscar el nodo mínimo
+    const Nodo* minNode(const Nodo* p) const {
+        if (!p) return nullptr;
+        if (!p->izq) return p;
+        return minNode(p->izq);
+    }
+/*
+==========================================================================================
+ENUNCIADO - PREGUNTA 1: ELIMINACIÓN DE UN ELEMENTO X EN UN ABB
+==========================================================================================
+Implementa la eliminación de un elemento x del ABB. Deberás completar el método auxiliar 
+recursivo borrarRec(Nodo* p, const int x) y el método público borrar(const int x).
+
+REQUISITOS DE BORRAR REC:
+- Debe retornar el puntero al nodo que debe ocupar la posición de p después de la eliminación.
+- Si p == nullptr, retorna nullptr.
+- Si x < p->dato, debe llamar recursivamente a borrarRec por la izquierda y reasignar p->izq.
+- Si x > p->dato, debe llamar recursivamente a borrarRec por la derecha y reasignar p->der.
+- Si x == p->dato (nodo encontrado):
+    * Caso 0 o 1 hijo: Elimina p y devuelve el único hijo.
+    * Caso 2 hijos: Busca el nodo mínimo del subárbol derecho y lo reemplaza en el valor 
+      de p, luego borra el nodo encontrado.
+==========================================================================================
+*/
+    // ==========================================
+    // A IMPLEMENTAR: Método auxiliar recursivo
+    // ==========================================
+    Nodo* borrarRec(Nodo* p, const int x) {
+        // TU CÓDIGO AQUÍ:
+        if(p == nullptr){
+            return nullptr;
+        }
+        else if(x < p->dato){               //si es menor voy por izq
+            p->izq =  borrarRec(p->izq, x); // sino pongo el "p->izq" no lo podría enganchar con este nodo que está arriba, lo perdería
+        }
+        else if(x > p->dato){               //si es mayor voy por der
+            p->der = borrarRec(p->der, x);
+        }
+        else{                                //si lo encontré me voy a los casos
+            // CASO 0 o 1 HIJO:
+            if(p->izq == nullptr){           // No hay hijo izquierdo (o ninguno)
+                Nodo* temp = p->der;         // Si no tenía derecho, temp será nullptr
+                delete p;                    // Borramos el nodo de forma segura
+                return temp;                 // Devolvemos el sustituto al padre
+            }
+            else if(p->der == nullptr){      // No hay hijo derecho
+                Nodo* temp = p->izq;
+                delete p;
+                return temp;
+            }
+            // CASO 2 HIJOS:
+            else {
+                // 1. Buscamos el nodo mínimo a la derecha y le sacamos el dato
+                const Nodo* minimo = minNode(p->der); // Usamos const como pide la plantilla[cite: 1]
+                p->dato = minimo->dato;               // Reemplazamos el valor[cite: 1]
+                
+                // 2. En lugar de hacer delete directo, llamamos a borrarRec 
+                // para que limpie el subárbol derecho y reenganche los punteros de allá abajo.
+                p->der = borrarRec(p->der, minimo->dato);
+            }
+        }
+    }
+
+public:
+    ABB() = default;
+
+    // ==========================================
+    // A IMPLEMENTAR: Método público de borrado
+    // ==========================================
+    void borrar(const int x){
+        // TU CÓDIGO AQUÍ:
+        raiz = borrarRec(raiz, x);
+    }
+
+    // Método de asistencia para insertar nodos y probar tu código
+    void insert(int x) {
+        raiz = insertRec(raiz, x);
+    }
+
+private:
+    Nodo* insertRec(Nodo* p, int x) {
+        if (!p) return new Nodo(x);
+        if (x < p->dato) p->izq = insertRec(p->izq, x);
+        else if (x > p->dato) p->der = insertRec(p->der, x);
+        return p;
+    }
+};

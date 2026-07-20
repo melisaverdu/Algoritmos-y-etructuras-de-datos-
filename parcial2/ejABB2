@@ -1,0 +1,87 @@
+#include <iostream>
+#include <algorithm>
+#include <cmath>
+
+/*
+==========================================================================================
+ENUNCIADO - PREGUNTA 1: VERIFICAR SI UN ÁRBOL ESTÁ BALANCEADO
+==========================================================================================
+Determinar si un árbol binario cumple el criterio de balanceo: que para cada nodo, la 
+diferencia de altura entre sus subárboles izquierdo y derecho sea como máximo 1.
+
+REQUISITOS:
+- esBalanceadoRecursivo(nodo): Debe retornar la altura del nodo si está balanceado, 
+  o -1 si detecta un desbalanceo en él o en sus hijos.
+- esBalanceado(): Método público que inicia la recursión y retorna true o false.
+==========================================================================================
+*/
+
+struct Nodo {
+    int dato;
+    Nodo* izquierdo;
+    Nodo* derecho;
+    Nodo(int val) : dato(val), izquierdo(nullptr), derecho(nullptr) {}
+};
+
+class BST {
+private:
+    Nodo* raiz;
+
+    // ==========================================
+    // A IMPLEMENTAR: Método auxiliar recursivo
+    // ==========================================
+    int esBalanceadoRecursivo(Nodo* nodo) {
+        // TU CÓDIGO AQUÍ:
+        if (nodo == nullptr) {
+            return 0;
+        }
+
+        // 2. Llamo al hijo izquierdo directamente. Si abajo ya falló, arrastro el -1[cite: 1]
+        int altizq = esBalanceadoRecursivo(nodo->izquierdo);
+        if (altizq == -1) return -1;
+
+        // 3. Llamo al hijo derecho directamente. Si abajo ya falló, arrastro el -1[cite: 1]
+        int altder = esBalanceadoRecursivo(nodo->derecho);
+        if (altder == -1) return -1;
+
+        // 4. Control de balanceo en el nodo actual:
+        // Si la diferencia entre las alturas es mayor a 1, tiramos el error (-1)[cite: 1]
+        if (abs(altizq - altder) > 1) {
+            return -1;
+        }
+
+        // 5. Retorno de altura 
+        // Comparamos a mano cuál rama es la más larga y le sumamos el '+1' del nodo actual[cite: 1]
+        if (altizq > altder) {
+            return 1 + altizq;
+        } else {
+            return 1 + altder;
+        }
+        
+    }
+
+public:
+    BST() : raiz(nullptr) {}
+    BST(Nodo* valor) : raiz(valor) {}
+
+    // ==========================================
+    // A IMPLEMENTAR: Método público de verificación
+    // ==========================================
+    bool esBalanceado() {
+        // TU CÓDIGO AQUÍ:
+        return esBalanceadoRecursivo(raiz) != -1;
+    }
+};
+
+int main() {
+    // Caso de prueba del parcial (Balanceado)
+    Nodo* raiz = new Nodo(10);
+    raiz->izquierdo = new Nodo(5);
+    raiz->derecho = new Nodo(15);
+    raiz->izquierdo->izquierdo = new Nodo(3);
+    
+    BST arbol(raiz);
+    std::cout << "Esta balanceado? (Esperado: Si): " << (arbol.esBalanceado() ? "Si" : "No") << std::endl;
+    
+    return 0;
+}

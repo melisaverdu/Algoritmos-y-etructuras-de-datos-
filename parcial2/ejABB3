@@ -1,0 +1,93 @@
+#include <iostream>
+
+using namespace std;
+
+class RegistroSensoresABB {
+private:
+    struct Nodo {
+        int temperatura;
+        Nodo* izq;
+        Nodo* drc;
+        Nodo(int t) : temperatura(t), izq(nullptr), drc(nullptr) {};
+    };
+    Nodo* raiz = nullptr;
+
+    // =================================================================
+    // Detalles importantes:
+    // Implementá un método insertar(int temperatura) para almacenar una lectura.
+    // =================================================================
+    Nodo* insertarRec(Nodo* nodo, int temp) {
+        // TU CÓDIGO AQUÍ:
+        if(nodo == nullptr){
+            return new Nodo(temp);
+        }
+        else if(temp < nodo->temperatura){
+            nodo->izq = insertarRec(nodo->izq, temp);
+        }
+        else{
+            nodo->drc = insertarRec(nodo->drc, temp);
+        }
+        return nodo;
+    }
+
+    // =================================================================
+    // Detalles importantes:
+    // Implementá el método recursivo contarCriticos(int umbral) 
+    // para contar valores mayores o iguales al umbral.
+    // =================================================================
+    int contarRec(Nodo* nodo, int umbral) {
+        // TU CÓDIGO AQUÍ:
+        if(nodo == nullptr){
+            return 0;
+        }
+        int cuenta = 0;
+        if(nodo->temperatura >= umbral){
+            int cuenta = 1; 
+        }
+        
+
+        return contarRec(nodo->izq, umbral) + contarRec(nodo->drc, umbral);
+    }
+
+public:
+    void insertar(int temp) {
+        raiz = insertarRec(raiz, temp);
+    }
+
+    int contarCriticos(int umbral) {
+        return contarRec(raiz, umbral);
+    }
+
+    // =================================================================
+    // Detalles importantes:
+    // Implementá el método imprimirCriticos(int umbral) que imprima exactamente:
+    // Sensores criticos (temp >= <umbral>): <cantidad>
+    // =================================================================
+    void imprimirCriticos(int umbral) {
+        // TU CÓDIGO AQUÍ:
+        int cantidad = contarRec(raiz, umbral);
+        cout << "Sensores criticos (temp >= " << umbral << "): " << cantidad << endl;
+
+    }
+};
+
+int main() {
+    // Caso de prueba 1
+    RegistroSensoresABB sistema1;
+    sistema1.insertar(42);
+    sistema1.insertar(35);
+    sistema1.insertar(50);
+    sistema1.insertar(47);
+    sistema1.imprimirCriticos(42); // Esperado: Sensores criticos (temp >= 42): 3
+
+    // Caso de prueba 2
+    RegistroSensoresABB sistema2;
+    sistema2.insertar(10);
+    sistema2.insertar(5);
+    sistema2.insertar(3);
+    sistema2.insertar(7);
+    sistema2.insertar(20);
+    sistema2.imprimirCriticos(8); // Esperado: Sensores criticos (temp >= 8): 2
+
+    return 0;
+}

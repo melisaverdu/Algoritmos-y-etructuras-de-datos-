@@ -1,0 +1,74 @@
+#include <iostream>
+#include <map>
+#include <vector>
+#include <string>
+#include <set>
+
+using namespace std;
+
+/*
+==========================================================================================
+ENUNCIADO - PREGUNTA 2: RED DE SENSORES (DFS RECURSIVO)
+==========================================================================================
+Durante la misión CONAE-Marte, la nave y sus módulos auxiliares (sensores térmicos, cámaras, actuadores, procesadores) se comunican entre
+sí a través de buses de datos (como CAN o I2C). Para mantener un funcionamiento seguro y eficiente, es necesario analizar cómo están
+conectados físicamente entre ellos.
+Cada módulo es un nodo, y cada conexión directa es una arista. Estas conexiones forman una red no dirigida que debe ser modelada para
+realizar diagnósticos en vuelo.
+Implementá una clase RedDeSensores que permita:
+agregarConexion(mod1, mod2): agregar una conexión directa bidireccional entre módulos.
+estanConectados(mod1, mod2): devolver true si mod1 y mod2 tienen una conexión directa.
+alcanzablesDesde(modInicio): devolver cuántos módulos pueden alcanzarse desde modInicio, utilizando búsqueda DFS recursiva.
+==========================================================================================
+*/
+
+class RedDeSensores {
+private:
+    map<string, vector<string>> grafo;
+
+    // ==========================================
+    // A IMPLEMENTAR: DFS Recursivo auxiliar
+    // ==========================================
+    void dfs(const string& actual, set<string>& visitados) {
+        // TU CÓDIGO AQUÍ:
+    }
+
+public:
+    RedDeSensores() = default;
+
+    // ==========================================
+    // A IMPLEMENTAR: Agregar conexión bidireccional
+    // ==========================================
+    void agregarConexion(const string& a, const string& b) {
+        // TU CÓDIGO AQUÍ:
+        grafo[a].push_back(b);
+        grafo[b].push_back(a);
+    }
+
+    // ==========================================
+    // A IMPLEMENTAR: Verificar conexión directa
+    // ==========================================
+    bool estanConectados(const string& a, const string& b) {
+        // TU CÓDIGO AQUÍ:
+        
+        return false;
+    }
+
+    // ==========================================
+    // A IMPLEMENTAR: Contar alcanzables mediante DFS
+    // ==========================================
+    int alcanzablesDesde(const string& inicio) {
+        // TU CÓDIGO AQUÍ:
+        return 0;
+    }
+};
+
+int main() {
+    RedDeSensores red;
+    red.agregarConexion("CPU", "Sensor1");
+    red.agregarConexion("Sensor1", "Sensor2");
+    red.agregarConexion("Sensor2", "Actuador");
+    
+    cout << "Modulos alcanzables desde CPU (Esperado: 4): " << red.alcanzablesDesde("CPU") << endl;
+    return 0;
+}
