@@ -1,0 +1,77 @@
+#include <iostream>
+#include <string>
+/*
+CyberCórdoba Trenes — Registro operativo de convoyes prioritarios
+
+Durante la madrugada, el Centro de Control Ferroviario recibe solicitudes de despacho desde distintos nodos de la ciudad. 
+Cada solicitud incluye el código operativo de un tren. Antes de autorizar una maniobra, el sistema debe consultar si ese tren está 
+registrado y cuál es su prioridad operativa.
+
+Para evitar recorrer todo el registro linealmente, Exodus Systems mantiene los trenes cargados en un Árbol Binario de Búsqueda 
+ordenado por Tren.codigo.
+
+Implemente exactamente este método:
+
+ResultadoBusqueda RegistroTrenes::buscarPorCodigo(int codigoBuscado)
+
+El método debe devolver:
+
+    ResultadoBusqueda(true, tren) si existe un tren con ese código.
+    ResultadoBusqueda(false, Tren()) si no existe.
+
+*/
+struct Tren {
+    int codigo;
+    std::string linea;
+    int prioridadOperativa;
+
+    Tren(int codigoTren = -1, std::string lineaTren = "", int prioridad = 0) 
+        : codigo(codigoTren), linea(lineaTren), prioridadOperativa(prioridad) {}
+};
+
+struct ResultadoBusqueda {
+    bool encontrado;
+    Tren tren;
+
+    ResultadoBusqueda(bool fueEncontrado = false, Tren trenEncontrado = Tren())
+        : encontrado(fueEncontrado), tren(trenEncontrado) {}
+};
+
+class NodoTren {
+public:
+    Tren dato;
+    NodoTren* izquierdo;
+    NodoTren* derecho;
+
+    explicit NodoTren(Tren tren) : dato(tren), izquierdo(nullptr), derecho(nullptr) {}
+};
+
+class RegistroTrenes {
+private:
+    NodoTren* raiz;
+
+public:
+    RegistroTrenes() : raiz(nullptr) {}
+    void insertar(Tren tren); // Ya implementado por la cátedra
+
+    // ==========================================
+    // TU CÓDIGO AQUÍ: Implementar el método
+    // ==========================================
+    ResultadoBusqueda buscarPorCodigo(int codigoBuscado) {
+        // Podés resolverlo con un while (iterativo) para no renegar con funciones auxiliares.
+        NodoTren* actual = raiz;
+
+        while(actual != nullptr){
+            if(actual->dato.codigo == codigoBuscado){
+                return ResultadoBusqueda(true, actual->dato);
+            }
+            if(codigoBuscado < actual->dato.codigo){
+                actual = actual->izquierdo;
+            }
+            else{
+                actual = actual->derecho;
+            }
+        }
+        return ResultadoBusqueda(false, Tren());
+    }   
+};

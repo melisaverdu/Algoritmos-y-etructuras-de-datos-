@@ -1,0 +1,161 @@
+/*
+
+no termine de entenderlo, despues en otro momento lo seguiré, o nunca, espero que nunca mas 
+================================================================================
+ENUNCIADO ORIGINAL:
+================================================================================
+Implemente los métodos bool esConexo() y bool tieneCiclo() de la clase Grafo, 
+que modela la red logística entre depósitos. El grafo es no dirigido y está 
+representado mediante una lista de adyacencia (std::vector<std::vector<int>>).
+
+Debe implementar:
+- BFS para determinar si el grafo es conexo desde el nodo 0.
+- DFS para detectar si existe algún ciclo en el grafo, controlando el “padre” 
+  del nodo actual.
+
+Condiciones:
+- En esConexo() debe usarse std::queue<int>.
+- En tieneCiclo() debe aplicarse DFS recursivo.
+- Si el grafo tiene 0 vértices, considérese conexo y sin ciclo.
+================================================================================
+*/
+
+#include <iostream>
+#include <vector>
+#include <queue>
+
+class Grafo {
+public:
+    // Constructor provisto por la cátedra
+    Grafo(int n) : N(n), adj(n) {}
+
+    // Método para agregar aristas provisto por la cátedra
+    void agregarArista(int u, int v) {
+        adj[u].push_back(v);
+        adj[v].push_back(u);
+    }
+
+    // =========================================================================
+    // A IMPLEMENTAR: Métodos principales
+    // =========================================================================
+    
+    bool esConexo() {
+        // Alerta del enunciado: Si el grafo tiene 0 vértices, considérese conexo.
+        if (N == 0) return true;
+
+        // TU CÓDIGO AQUÍ: Implementar BFS desde el nodo 0 usando std::queue<int>
+
+        //declaro lo que necesito 
+        std::vector<int> visitados(N, false);
+        std::queue<int> q;
+
+        //me encargo del origen
+        q.push(0);
+
+        //empiezo a encargarme de los elementos de la cola
+        while(!q.empty()){
+            int actual = q.front();
+            q.pop();
+
+            for(int vecinos : adj[actual]){ //recorremos los vecinos del nodo actual
+                if(visitados[vecinos] == false){ //no esta visitado
+                    visitados[vecinos] = true;
+                    q.push(vecinos);
+                }
+            }
+        }
+
+        for(int i=0; i<N; i++){
+            if(visitados[i] == false){
+                return false; //si encontramos uno solo sin visitar, quiero decir que no es conexo
+            }
+        }
+        return true; // Modificar según corresponda
+    }
+
+    bool tieneCiclo() {
+        // Alerta del enunciado: Si el grafo tiene 0 vértices, considérese sin ciclo.
+
+        //Un ciclo real ocurre si encontrás un vecino visitado que NO es el nodo de donde venís (o sea, es distinto a tu padre).
+        if (N == 0) return false;
+
+        std::vector<bool> vis(N, false);
+
+        for(int v=0; v<N; v++){ //voy a recorrer los vecinos
+            if(vis[v] == false){ //si alguno no esta visitado entro
+                if(dfsCiclo(v, -1, vis) == true){ //encontró un ciclo
+                    return true;
+                }
+            }
+        }
+        // TU CÓDIGO AQUÍ: Inicializar estructuras y lanzar el DFS recursivo para cada nodo
+        
+        return false; // si paso por todos y no encontró, es false
+    }
+
+private:
+    int N; // Cantidad de vértices
+    std::vector<std::vector<int>> adj; // Lista de adyacencia (vector de vectores)
+
+    // =========================================================================
+    // A IMPLEMENTAR: Auxiliar recursivo (DFS)
+    // =========================================================================
+    bool Grafo::dfsCiclo(int u, int padre, std::vector<bool>& vis) {
+    vis[u] = true; // Marcamos la habitación actual con una cruz
+
+    // Revisamos todos los vecinos del nodo actual
+    for (int vecino : adj[u]) {
+        
+        // REGLA: Solo nos importa si NO es la habitación de donde vinimos
+        if (vecino != padre) {
+            
+            // Si ya tiene una cruz... ¡Caminamos en círculos! ¡Hay ciclo!
+            if (vis[vecino] == true) {
+                return true; 
+            }
+            
+            // Si no tiene cruz, nos metemos a explorar esa habitación
+            // Ahora nosotros (u) somos el padre de ese vecino
+            if (dfsCiclo(vecino, u, vis) == true) {
+                return true; // Si adentro del laberinto encontraron un ciclo, avisamos para arriba
+            }
+        }
+    }
+
+    return false; // Si revisamos todos los vecinos y ninguno dio ciclo, estamos limpios
+}
+};
+
+// =========================================================================
+// Casos de prueba del parcial para verificar en el main
+// =========================================================================
+int main() {
+    // Prueba 1 (Camino simple). Esperado: C NCIC
+    std::cout << "--- Prueba 1 ---" << std::endl;
+    Grafo G1(4);
+    G1.agregarArista(0, 1);
+    G1.agregarArista(1, 2);
+    G1.agregarArista(2, 3);
+    std::cout << "Esperado: C NCIC" << std::endl;
+    std::cout << "Obtenido: " << (G1.esConexo() ? "C" : "NC") << " " << (G1.tieneCiclo() ? "CIC" : "NCIC") << "\n\n";
+
+    // Prueba 2 (Con ciclo). Esperado: C CIC
+    std::cout << "--- Prueba 2 ---" << std::endl;
+    Grafo G2(4);
+    G2.agregarArista(0, 1);
+    G2.agregarArista(1, 2);
+    G2.agregarArista(2, 0); 
+    G2.agregarArista(2, 3);
+    std::cout << "Esperado: C CIC" << std::endl;
+    std::cout << "Obtenido: " << (G2.esConexo() ? "C" : "NC") << " " << (G2.tieneCiclo() ? "CIC" : "NCIC") << "\n\n";
+
+    // Prueba 3 (Desconectado). Esperado: NC NCIC
+    std::cout << "--- Prueba 3 ---" << std::endl;
+    Grafo G3(5);
+    G3.agregarArista(0, 1);
+    G3.agregarArista(2, 3); 
+    std::cout << "Esperado: NC NCIC" << std::endl;
+    std::cout << "Obtenido: " << (G3.esConexo() ? "C" : "NC") << " " << (G3.tieneCiclo() ? "CIC" : "NCIC") << "\n\n";
+
+    return 0;
+}

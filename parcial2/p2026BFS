@@ -1,0 +1,138 @@
+#include <iostream>
+#include <string>
+/*
+CyberCórdoba Trenes — Evacuación por túneles operativos
+
+Una tormenta electromagnética dejó fuera de servicio algunas estaciones del sistema nocturno. 
+El centro de control debe decidir cuántos transbordos mínimos necesita un equipo técnico para viajar 
+desde una estación origen hasta una estación destino usando solamente estaciones operativas.
+
+La red se modela como un grafo no ponderado:
+
+    Cada estación es un nodo.
+    Cada túnel bidireccional es una arista.
+    Cada túnel cuesta exactamente 1 transbordo.
+
+Como todas las aristas tienen el mismo costo, la estrategia correcta es explorar por niveles usando BFS.
+
+Implemente exactamente este método:
+
+int RedTrenes::minimoTransbordosSeguros(int origenId, int destinoId)
+
+Debe devolver:
+
+    -1 si algún id es inválido.
+    -1 si origen o destino no están operativos.
+    -1 si no existe ruta segura.
+    0 si origen y destino son la misma estación operativa.
+    La mínima cantidad de transbordos en cualquier otro caso.
+
+Restricciones:
+
+    Use Queue<EstadoBusqueda>.
+    No use std::queue.
+    No use vector.
+    No use recursión.
+
+*/
+
+// Contrato de la cola provista por la cátedra
+template <typename TData>
+class Queue {
+    // Nota: La implementación interna la provee el examinador, 
+    // nosotros usamos su interfaz pública obligatoria.
+public:
+    Queue();
+    void enqueue(const TData& value);
+    void dequeue();
+    TData front() const;
+    bool isEmpty() const;
+    int size() const;
+};
+
+struct Estacion {
+    std::string nombre;
+    bool operativa;
+
+    Estacion(std::string nombreEstacion = "", bool estaOperativa = true)
+        : nombre(nombreEstacion), operativa(estaOperativa) {}
+};
+
+struct EstadoBusqueda {
+    int estacionId;
+    int distancia;
+
+    EstadoBusqueda(int id = -1, int dist = 0)
+        : estacionId(id), distancia(dist) {}
+};
+
+class RedTrenes {
+private:
+    static const int MAX_ESTACIONES = 20;
+
+    Estacion estaciones[MAX_ESTACIONES];
+    bool hayTunel[MAX_ESTACIONES][MAX_ESTACIONES];
+    int cantidadEstaciones;
+
+public:
+    RedTrenes();
+    int agregarEstacion(std::string nombre, bool operativa = true);
+    void cambiarEstadoOperativo(int estacionId, bool operativa);
+    void conectarBidireccional(int origenId, int destinoId);
+
+    // ===================================================
+    // TU CÓDIGO AQUÍ: Implementación del método solicitado
+    // ===================================================
+    int minimoTransbordosSeguros(int origenId, int destinoId) {
+    /*-1 si algún id es inválido.
+    -1 si origen o destino no están operativos.
+    -1 si no existe ruta segura.
+    0 si origen y destino son la misma estación operativa.
+    La mínima cantidad de transbordos en cualquier otro caso.*/
+
+    if(origenId < 0 || origenId >= cantidadEstaciones || destinoId == 0 || destinoId >= cantidadEstaciones){
+        return -1;
+    }
+
+    if(!estaciones[origenId].operativa || !estaciones[destinoId].operativa){
+        return -1;
+    }
+
+    if(origenId == destinoId){
+        return -1;
+    }
+
+    bool visitados[MAX_ESTACIONES];
+        Queue<EstadoBusqueda> q;
+        int dist[MAX_ESTACIONES];
+
+        for(int i=0; i<cantidadEstaciones; i++){
+            visitados[i]=false;
+            dist[i]=0;
+        }
+
+        visitados[origenId]=true;
+        dist[origenId]=0;
+        q.enqueue(EstadoBusqueda(origenId,0));
+
+        while(!q.isEmpty()){
+            auto actual = q.front();
+            q.dequeue();
+
+            int u = actual.estacionId;
+
+            if(u == destinoId){
+                return dist[u];
+            }
+
+            for(int v=0; v<cantidadEstaciones; v++){
+                if(!visitados[v] && estaciones[v].operativa && hayTunel[u][v]){
+                    visitados[v]=true;
+                    dist[v]=dist[u]+1;
+                    q.enqueue(EstadoBusqueda(v,dist[v]));
+                }
+            }
+        }
+        return -1;
+    }
+};

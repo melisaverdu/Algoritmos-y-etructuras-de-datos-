@@ -373,7 +373,7 @@ void printStackHelper(Stack<TData> s) { // Recibe por copia de forma segura para
 
 int main() {
     std::cout << "==================================================\n";
-    std::cout << "  INICIANDO TESTING DEL PRIMER PARCIAL S1-2026\n";[cite: 1]
+    std::cout << "  INICIANDO TESTING DEL PRIMER PARCIAL S1-2026\n";
     std::cout << "==================================================\n\n";
 
     // ------------------------------------------------------------------------

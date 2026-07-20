@@ -187,18 +187,8 @@ public:
     // -------------------------------------------------------------------------
     bool esBipartito() {
         // TU CÓDIGO AQUÍ:
-        int colores[V];
-        for(int i=0; i<V; i++){
-            colores[i]=-1;
-        }
-
-        for(int i=0; i<V; i++){
-            if(colores[i] == -1){
-                esBipartitoRec(i, 0, colores);
-            }
-        }
-        
-    }
+       //ESTA RESUELTA EN EL CUADERNO COPIALA
+    };
 };
 
 
@@ -273,7 +263,7 @@ int main() {
     cout << "Test Grafo 2 (Ciclo Impar): " << g2.esBipartito() << " | Esperado: 0" << endl;
 
     return 0;
-}
+};
 
 /* =============================================================================
    PREGUNTAS TEÓRICAS DEL PARCIAL (Para repasar)
